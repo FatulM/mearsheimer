@@ -2,7 +2,7 @@
 
 ## Project Description
 
-This is a static Persian (Farsi) website that presents blog-style Persian summaries of the videos from John Mearsheimer's YouTube channel (https://www.youtube.com/@JohnMearsheimer). Each episode of the channel becomes a Persian blog post on the website, linked to the original YouTube video. The website will be hosted on GitHub Pages.
+This is a static Persian (Farsi) website that presents blog-style Persian summaries of the videos from [John Mearsheimer's YouTube channel](https://www.youtube.com/@JohnMearsheimer). Each episode of the channel becomes a Persian blog post on the website, linked to the original YouTube video. The website will be hosted on GitHub Pages.
 
 ## Conventions
 
@@ -69,8 +69,6 @@ Each `info/episode-N.txt` is structured as follows:
 1. The cue number (starting at 1).
 2. A timestamp line: `HH:MM:SS,mmm --> HH:MM:SS,mmm`.
 3. One or more lines of subtitle text.
-
-Transcripts are reference only; They are passed into the post-generation prompt only when using a model without native YouTube access (see Model Requirements for Post Generation).
 
 ## Content Format
 
