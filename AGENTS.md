@@ -55,3 +55,29 @@ Each `info/episode-N.txt` is structured as follows:
 1. The video URL (first line).
 2. The video title.
 3. The video description, which spans multiple lines and contains the chapters info (a `Chapters` section listing `{mm:ss} {TITLE}` lines, preceded by a dash separator line).
+
+`info/channel.txt` is structured as follows:
+
+1. The channel URL (first line).
+2. The channel name.
+3. The channel description text.
+
+## Transcript Format
+
+`transcript/episode-N.srt` is a standard SRT subtitle file downloaded from YouTube. It is a sequence of cues separated by blank lines, each cue consisting of:
+
+1. The cue number (starting at 1).
+2. A timestamp line: `HH:MM:SS,mmm --> HH:MM:SS,mmm`.
+3. One or more lines of subtitle text.
+
+Transcripts are reference only; They are passed into the post-generation prompt only when using a model without native YouTube access (see Model Requirements for Post Generation).
+
+## Content Format
+
+`content/episode-N.md` is a Persian Markdown blog post with the following structure:
+
+1. The first line is the H1 heading `# {VIDEO TITLE}`.
+2. For episodes with chapters, each section starts with an H2 heading `## {mm:ss} - {TITLE}`. The pipeline converts the timestamp into a link to the matching moment of the YouTube video.
+3. For the chapter-free introduction episode (episode 0), there are no sections; the body uses lists instead.
+
+Every section heading must be followed by a blank line.
