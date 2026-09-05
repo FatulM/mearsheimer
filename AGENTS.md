@@ -81,3 +81,13 @@ Transcripts are reference only; They are passed into the post-generation prompt 
 3. For the chapter-free introduction episode (episode 0), there are no sections; the body uses lists instead.
 
 Every section heading must be followed by a blank line.
+
+## Subtitle Extraction
+
+YouTube subtitles are downloaded with yt-dlp for reference into `transcript/episode-N.srt`:
+
+```bash
+yt-dlp --cookies-from-browser chrome --write-auto-sub --convert-subs=srt --skip-download {LINK}
+```
+
+After downloading, rename the resulting `.srt` file to `transcript/episode-N.srt` for episode N.
