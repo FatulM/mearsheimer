@@ -1,0 +1,47 @@
+For each YouTube video I provide, write a well-structured blog post in Persian (Farsi). Use simple, natural language suitable for Iranian readers. Avoid unnecessarily difficult words and unnecessary English terms.
+
+Preserve the video's chapter structure. Translate or rename chapter titles when appropriate. Include each chapter's starting timestamp only in its Markdown heading. Do not include timestamps elsewhere in the text, and do not include the YouTube link.
+
+The post should be concise but sufficiently detailed to communicate the video's main ideas without requiring the reader to watch the video. Treat the video's content as factual, unless the video itself explicitly identifies something as an opinion, interpretation, uncertainty, or disputed claim. Do not say or imply that “the video says,” “the speaker says,” or use similar meta-references. Do not mention or name the speaker.
+
+Output only the Markdown blog post. Do not add explanations, notes, or commentary. Within each section, use as many paragraphs as necessary and include lists, quotations, citations, headings, or any other Markdown structures that improve the presentation. Leave one blank line after every section and end the output with a blank line.
+
+The output structure should be something like this (but in Persian) for videos from episode 1 and afterwards:
+
+```markdown
+# {VIDEO TITLE}
+
+## {mm:ss start of the section 1 timestamp} - {SECTION 1 TITLE}
+
+{TEXT OF THE SECTION 1}
+
+## {mm:ss start of the section 2 timestamp} - {SECTION 2 TITLE}
+
+{TEXT OF THE SECTION 2}
+
+```
+
+But for the first video, which is the introduction of the channel, it does not have any chapters. Use lists in the resulting output. It should be like this (but in Persian):
+
+```markdown
+# {VIDEO TITLE}
+
+{TEXT}
+
+```
+
+For videos of episode 1 and afterwards, I will provide you with the video link and chapter info like the following:
+
+```
+{YOUTUBE VIDEO LINK}
+
+{CHAPTERS COPIED FROM THE VIDEO DESCRIPTION}
+```
+
+And for the first introduction video, I will provide you with only the video link like the following:
+
+```
+{YOUTUBE VIDEO LINK}
+```
+
+For each of my requests, you should give me the blog post for that video.
