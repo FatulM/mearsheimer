@@ -21,13 +21,15 @@ TODO: Add other files and folders.
 
 ```
 mearsheimer/
-├── content/                    # Source content for the website
+├── content/                    # Persian blog posts for the website
+│   └── episode-N.md            # Persian blog post for episode N (generated with prompts/generate-post.md)
+├── info/                       # Episode and channel metadata
 │   ├── channel.txt             # Channel metadata (URL, title, description)
-│   ├── episode-N.txt           # Video URL + title + description + chapters for episode N (metadata source)
-│   ├── episode-N.srt           # Downloaded YouTube subtitles for episode N (reference)
-│   └── episode-N.md            # Persian blog post for episode N (generated with prompts/PROMPT.md)
+│   └── episode-N.txt           # Video URL + title + description + chapters for episode N (metadata source)
+├── transcript/                 # Downloaded YouTube subtitles (reference)
+│   └── episode-N.srt           # Subtitles for episode N
 ├── prompts/
-│   └── PROMPT.md               # System prompt used to generate Persian posts from videos
+│   └── generate-post.md        # System prompt used to generate Persian posts from videos
 ├── .github/
 │   └── copilot-instructions.md # Points to AGENTS.md
 ├── robots.txt                  # Crawler rules
@@ -36,3 +38,12 @@ mearsheimer/
 ├── README.md                   # Project overview and workflow docs
 └── LICENSE                     # License file
 ```
+
+### Model Requirements for Post Generation
+
+- `prompts/generate-post.md` is written for **Gemini** models, which have native access to YouTube videos (title, description, chapters, and transcripts) from just the video URL. The best model for this task as of today is **Gemini 3.1 Pro**.
+- When using a non-Gemini model (or any model without native YouTube access), the prompt must be slightly adapted: pass the downloaded `transcript/episode-N.srt` subtitles into the prompt alongside the video URL and chapters.
+
+## Episodes
+
+- Episode 0 is the channel introduction video. It has no chapters, so `info/episode-0.txt` contains only the video URL and its post follows the chapter-free list-based format described in `prompts/generate-post.md`.
