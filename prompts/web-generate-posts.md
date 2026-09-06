@@ -40,6 +40,8 @@ For videos of episode 1 and afterwards, I will provide you with the video link a
 {CHAPTERS COPIED FROM THE VIDEO DESCRIPTION}
 ```
 
+The chapters I provide use `m:ss` timestamps (minutes with no leading zero). Normalise them to `mm:ss` (with a leading zero when needed) in the chapter headings of your output.
+
 And for the first introduction video, I will provide you with only the video link like the following:
 
 ```

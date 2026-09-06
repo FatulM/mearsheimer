@@ -31,4 +31,6 @@ For each of my requests, I will provide you with the video link and chapter info
 {CHAPTERS COPIED FROM THE VIDEO DESCRIPTION}
 ```
 
+The chapters I provide use `m:ss` timestamps (minutes with no leading zero). Normalise them to `mm:ss` (with a leading zero when needed) in the chapter headings of your output.
+
 For each of my requests, you should give me the blog post for that video.
