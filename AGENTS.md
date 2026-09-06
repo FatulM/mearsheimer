@@ -48,13 +48,14 @@ pip install -r requirements.txt
 ```
 mearsheimer/
 ├── content/                    # Persian blog posts (episode-N.md)
+├── critique/                   # Fact-check critiques of the posts (episode-N.md)
 ├── info/                       # Channel + episode metadata (URL, title, chapters)
 ├── transcript/                 # Downloaded YouTube subtitles (episode-N.srt)
 ├── processed/                  # Minified transcripts for model input (episode-N.md)
-├── prompts/                    # Reusable system prompts for post generation
+├── prompts/                    # Reusable system prompts (post generation + critique)
 ├── scripts/                    # Python tooling (process, create, check, build)
 ├── requirements.txt            # Python dependencies
-├── docs/                        # Static site root (published via GitHub Pages)
+├── docs/                       # Static site root (published via GitHub Pages)
 │   ├── index.html              # Homepage: episode-0 intro + episode links
 │   ├── episode-N.html          # One page per episode (N≥1)
 │   ├── assets/                 # Site assets; style.css is the shared stylesheet
@@ -79,6 +80,7 @@ mearsheimer/
 
 - `prompts/generate-post-0.md` and `prompts/generate-post-N.md` are used when the model is given the video details from `processed/episode-0.md` / `processed/episode-N.md` (the video title and the transcript text or chapters). These work with any model; no native YouTube access is required.
 - `prompts/web-generate-posts.md` and `prompts/web-generate-posts-N.md` are written for **Gemini** models, which have native access to YouTube videos (title, description, chapters, and transcripts) from just the video URL. The user provides the video link and the chapters copied from the video description. These prompts are used manually in a chat with the best model for this task as of today, **Gemini 3.1 Pro**; this is separate from the `LLM_MODEL` configured in `.env`, which `scripts/create_content.py` uses for the transcript-based pipeline.
+- `prompts/research-critique*.md` handle fact-checking the Persian posts. `prompts/research-critique.md` is the lighter prompt that takes only the `content/episode-N.md` file; `prompts/research-critique-full.md` additionally consumes the `processed/episode-N.md` English transcript for cross-referencing. These prompts ask the model to research authoritative English-language sources (peer-reviewed journals, think-tanks, international news, official reports) for each chapter, evaluate factual accuracy, analytical rigor, opposing viewpoints, and missing context, and output a per-chapter Persian critique. The model is instructed to keep the entire output in Persian, use Persian numerals, omit timestamps, keep chapter titles verbatim, and never drop a chapter.
 - When using a non-Gemini model (or any model without native YouTube access), the prompt must be slightly adapted: pass the downloaded `transcript/episode-N.srt` subtitles into the prompt alongside the video URL and chapters.
 
 ## Episodes
@@ -145,6 +147,7 @@ After downloading, rename the resulting `.srt` file to `transcript/episode-N.srt
 LLM_BASE_URL=https://api.avalai.org/v1
 LLM_API_KEY=aa-FILL_ME_IN
 LLM_MODEL=gemini-3.8-flash
+LLM_MODEL_CRITIQUE=gpt-5.6-terra
 ```
 
 `scripts/create_content.py` reads the minified transcript, sends it to the model as the user content with the matching prompt in `prompts/` as the system prompt, and writes the Model output to `content/episode-N.md`.
@@ -155,6 +158,15 @@ LLM_MODEL=gemini-3.8-flash
 2. Download subtitles with yt-dlp into `transcript/episode-N.srt` (see Subtitle Extraction).
 3. Run `python3 scripts/process_transcripts.py` to generate `processed/episode-N.md`.
 4. Run `python3 scripts/create_content.py N` to generate the Persian blog post `content/episode-N.md`, reading `processed/episode-N.md` and the matching system prompt (`prompts/generate-post-0.md` for episode 0, `prompts/generate-post-N.md` for N≥1) and calling the OpenAI-compatible endpoint configured in `.env`.
+
+## Critique Pipeline
+
+`scripts/critique_content.py` fact-checks the Persian blog post for an episode (N≥1) and writes the result to `critique/episode-N.md`. It calls the OpenAI-compatible endpoint configured in `.env` using the `LLM_MODEL_CRITIQUE` model with a `web_search` tool enabled, and the matching system prompt (`prompts/research-critique.md` by default, or `prompts/research-critique-full.md` with `--full`, which additionally passes the English transcript from `processed/episode-N.md` for cross-referencing).
+
+```bash
+python3 scripts/critique_content.py 3        # light critique (content only)
+python3 scripts/critique_content.py 3 --full # full critique (content + transcript)
+```
 
 ## Website Build
 
