@@ -40,6 +40,7 @@ pip install -r requirements.txt
 - All website content will be in Persian (Farsi) language for Iranian Readers unless explicitly requested otherwise.
 - HTML/CSS/JS changes should maintain RTL layout and Vazirmatn font usage.
 - Content updates should be made first to source `.md` files then reflected in html `.html` files.
+- `www/` is the static site root published via GitHub Pages; all HTML, CSS, and crawler files live there.
 
 ## Project Structure
 
@@ -63,10 +64,11 @@ mearsheimer/
 │   ├── process_transcripts.py  # Minifies info + SRT into processed/episode-N.md
 │   └── create_content.py       # Generates content/episode-N.md via the .env-configured LLM endpoint
 ├── requirements.txt            # Python dependencies
+├── www/                        # Static site root (published via GitHub Pages)
+│   └── robots.txt              # Crawler rules
 ├── .github/
 │   └── copilot-instructions.md # Points to AGENTS.md
 ├── .env.example                # Committed template for the gitignored .env (LLM endpoint config)
-├── robots.txt                  # Crawler rules
 ├── AGENTS.md                   # Agent instructions (this file)
 ├── CLAUDE.md                   # Points to AGENTS.md
 ├── README.md                   # Project overview
