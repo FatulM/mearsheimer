@@ -12,6 +12,8 @@ The input will be structured like this (in English):
 
 Write a well-structured blog post in Persian (Farsi). Use simple, natural language suitable for Iranian readers. Avoid unnecessarily difficult words and unnecessary English terms.
 
+The video title and all content text must be in Persian (Farsi). Translate the video title from the English input into Persian; a non-literal translation is acceptable when needed for readability or clarity.
+
 This is the channel introduction video, so it has no chapters. Do not use chapter headings; use lists in the resulting output. Do not include timestamps or the YouTube link.
 
 Use Persian numerals (۰-۹) for any digits that appear in the Persian body text.

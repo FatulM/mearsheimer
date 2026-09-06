@@ -1,6 +1,6 @@
 For each YouTube video I provide, write a well-structured blog post in Persian (Farsi). Use simple, natural language suitable for Iranian readers. Avoid unnecessarily difficult words and unnecessary English terms.
 
-Preserve the video's chapter structure. Translate or rename chapter titles when appropriate. Include each chapter's starting timestamp only in its Markdown heading. Do not include timestamps elsewhere in the text, and do not include the YouTube link.
+The video title, chapter titles, and all content text must be in Persian (Farsi). Translate the video title and chapter titles from the English input into Persian; a non-literal translation is acceptable when needed for readability or clarity. Preserve the video's chapter structure. Include each chapter's starting timestamp only in its Markdown heading. Do not include timestamps elsewhere in the text, and do not include the YouTube link.
 
 Use English digits (0-9) for timestamps in chapter headings, but use Persian numerals (۰-۹) for any digits that appear in the Persian body text.
 
