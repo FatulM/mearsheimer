@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Build the static Persian website (www/) from the generated Markdown posts.
+Build the static Persian website (docs/) from the generated Markdown posts.
 
 Reads the Persian blog posts in content/episode-N.md and the video metadata in
-info/episode-N.txt, then renders a complete RTL site under www/:
+info/episode-N.txt, then renders a complete RTL site under docs/:
 
   * index.html                 - homepage: the episode-0 intro article + links to all episode pages
   * episode-N.html             - one page per episode (N≥1), each chapter heading linked to
@@ -27,8 +27,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT_DIR = ROOT / "content"
 INFO_DIR = ROOT / "info"
-WWW_DIR = ROOT / "www"
-ASSETS_DIR = WWW_DIR / "assets"
+DOCS_DIR = ROOT / "docs"
+ASSETS_DIR = DOCS_DIR / "assets"
 
 SITE_TITLE = "جان میرشایمر"
 SITE_SUBTITLE = "وب‌لاگ فارسی رویدادها و تحلیل‌های جان میرشایمر"
@@ -255,7 +255,7 @@ def main() -> int:
             body=body,
             nav_links=nav_links,
         )
-        out = WWW_DIR / f"episode-{n}.html"
+        out = DOCS_DIR / f"episode-{n}.html"
         out.write_text(page, encoding="utf-8")
         print(f"[ok] wrote {out.relative_to(ROOT)}")
 
@@ -295,7 +295,7 @@ def main() -> int:
         body=body0,
         nav_links=nav0,
     )
-    index_out = WWW_DIR / "index.html"
+    index_out = DOCS_DIR / "index.html"
     index_out.write_text(index, encoding="utf-8")
     print(f"[ok] wrote {index_out.relative_to(ROOT)}")
     return 0

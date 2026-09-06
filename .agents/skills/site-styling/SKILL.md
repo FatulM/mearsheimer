@@ -1,6 +1,6 @@
 ---
 name: site-styling
-description: Style and polish the generated Mearsheimer Persian static site. Use when the user wants to restyle, theme, or refine the "final form" of the pages produced by scripts/build_site.py (www/). Covers CSS theming, the shared page shell (header/nav/footer markup), RTL/layout polish, Vazirmatn typography, and responsive design.
+description: Style and polish the generated Mearsheimer Persian static site. Use when the user wants to restyle, theme, or refine the "final form" of the pages produced by scripts/build_site.py (docs/). Covers CSS theming, the shared page shell (header/nav/footer markup), RTL/layout polish, Vazirmatn typography, and responsive design.
 ---
 
 # Site styling skill
@@ -13,14 +13,14 @@ content.
 
 ## Files you work with
 
-- `www/assets/style.css` — the single shared stylesheet loaded by every page. This is
+- `docs/assets/style.css` — the single shared stylesheet loaded by every page. This is
   your primary editing target.
 - `scripts/build_site.py` — owns the full-page HTML *shell*: `page_template()`,
   `nav_link()`, header/subtitle/footer markup, and the `index.html` episode-card markup.
   If you need to change the shell/info-architecture (nav, footer, layout wrappers),
   edit the template strings in this script and re-run it. Note the AGENTS convention:
   content source files (`.md`) are updated first, then reflected in `.html`.
-- `www/index.html`, `www/episode-N.html` (N≥1), `www/robots.txt` — generated outputs.
+- `docs/index.html`, `docs/episode-N.html` (N≥1), `docs/robots.txt` — generated outputs.
   There is **no separate episode-0 page**: the homepage `index.html` embeds the
   episode-0 intro article plus the cards linking to each episode page. Do not hand-edit
   the article bodies after the fact; change `build_site.py` and regenerate instead, so
@@ -51,17 +51,17 @@ content.
 
 ## Workflow
 
-1. Re-read the current `www/assets/style.css` and the relevant page shell in
+1. Re-read the current `docs/assets/style.css` and the relevant page shell in
    `scripts/build_site.py` before making changes so you match existing conventions.
 2. Theme within `assets/style.css` first. Change design tokens (colors, spacing,
    radii, shadows, typography scale) toward a polished, editorial, easy-to-read look.
    The accent/brand color lives in `:root` custom properties.
 3. If structural polish is needed (header, nav, episode cards, footer), edit the
    template strings in `scripts/build_site.py`, then re-run
-   `python3 scripts/build_site.py` to regenerate `www/`.
+   `python3 scripts/build_site.py` to regenerate `docs/`.
 4. Never edit the generated `.html` article bodies by hand; if content must change,
    update `content/episode-N.md` and regenerate.
-5. Open two generated pages (e.g. `www/index.html` and `www/episode-1.html`) to confirm
+5. Open two generated pages (e.g. `docs/index.html` and `docs/episode-1.html`) to confirm
    the styling reads well with real content and the layout is consistent.
 
 ## What "final form" means here
