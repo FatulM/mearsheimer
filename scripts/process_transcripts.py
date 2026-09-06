@@ -10,8 +10,8 @@ Episodes without chapters (e.g. the channel introduction) are written as
 a single text block instead.
 
 Usage:
-    python3 minify.py            # all episodes
-    python3 minify.py 1 3        # only episodes 1 and 3
+    python3 scripts/process_transcripts.py              # all episodes
+    python3 scripts/process_transcripts.py 1 3          # only episodes 1 and 3
 """
 
 import re
