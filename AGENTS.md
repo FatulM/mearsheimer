@@ -7,6 +7,7 @@ This is a static Persian (Farsi) website that presents blog-style Persian summar
 ## Conventions
 
 - Never commit, stage, reset, or discard changes unless explicitly requested. Preserve unrelated user changes.
+- 120-char line length for .py files
 - Markdown documents have no line-length limit.
 - Markdown headings must be followed by a blank line.
 - All textual files, including code and documents, must end with a newline.
@@ -20,7 +21,7 @@ This is a static Persian (Farsi) website that presents blog-style Persian summar
 ```
 mearsheimer/
 ├── content/                    # Persian blog posts for the website
-│   └── episode-N.md            # Persian blog post for episode N (generated with prompts/generate-post.md)
+│   └── episode-N.md            # Persian blog post for episode N (generated with prompts/generate-post-0.md or generate-post-N.md)
 ├── info/                       # Episode and channel metadata
 │   ├── channel.txt             # Channel metadata (URL, title, description)
 │   └── episode-N.txt           # Video URL + title + description + chapters for episode N (metadata source)
@@ -29,7 +30,10 @@ mearsheimer/
 ├── processed/                  # Minified subtitle files for model input (generated)
 │   └── episode-N.md            # Minified transcript for episode N (generated with scripts/process_transcripts.py)
 ├── prompts/
-│   └── generate-post.md        # System prompt used to generate Persian posts from videos
+│   ├── generate-post-0.md      # System prompt for generating the Persian intro post from processed/episode-0.md
+│   ├── generate-post-N.md      # System prompt for generating Persian posts from processed/episode-N.md (N≥1)
+│   ├── web-generate-posts.md   # System prompt (for models with YouTube/web access) covering both the intro and N≥1 videos
+│   └── web-generate-posts-N.md # System prompt (for models with YouTube/web access) for N≥1 videos from link + chapters
 ├── scripts/
 │   └── process_transcripts.py  # Minifies info + SRT into processed/episode-N.md
 ├── .github/
@@ -43,12 +47,13 @@ mearsheimer/
 
 ## Model Requirements for Post Generation
 
-- `prompts/generate-post.md` is written for **Gemini** models, which have native access to YouTube videos (title, description, chapters, and transcripts) from just the video URL. The best model for this task as of today is **Gemini 3.1 Pro**.
+- `prompts/generate-post-0.md` and `prompts/generate-post-N.md` are used when the model is given the video details from `processed/episode-0.md` / `processed/episode-N.md` (the video title, URL, and transcript text or chapters). These work with any model; no native YouTube access is required.
+- `prompts/web-generate-posts.md` and `prompts/web-generate-posts-N.md` are written for **Gemini** models, which have native access to YouTube videos (title, description, chapters, and transcripts) from just the video URL. The user provides the video link and the chapters copied from the video description. The best model for this task as of today is **Gemini 3.1 Pro**.
 - When using a non-Gemini model (or any model without native YouTube access), the prompt must be slightly adapted: pass the downloaded `transcript/episode-N.srt` subtitles into the prompt alongside the video URL and chapters.
 
 ## Episodes
 
-- Episode 0 is the channel introduction video. It has no chapters, so `info/episode-0.txt` contains only the video URL and its post follows the chapter-free list-based format described in `prompts/generate-post.md`.
+- Episode 0 is the channel introduction video. It has no chapters, so `info/episode-0.txt` contains only the video URL and its post follows the chapter-free list-based format described in `prompts/generate-post-0.md`.
 
 ## Info File Format
 
