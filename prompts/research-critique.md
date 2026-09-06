@@ -45,4 +45,4 @@ The output structure should be like this (but in Persian):
 {Assessment of chapter 2: summary of claims, research findings, and verdict on accuracy}
 ```
 
-Output only the Markdown-formatted assessment. Do not add explanations, notes, or commentary beyond the structured output. Leave one blank line after every section heading and end the output with a blank line.
+Output only the Markdown-formatted assessment. Do not add explanations, notes, commentary, or horizontal rules (`---`) beyond the structured output. Leave one blank line after every section heading and end the output with a blank line.
