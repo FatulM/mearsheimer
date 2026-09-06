@@ -48,7 +48,7 @@ Structure your output as a structured, comparative assessment. For each chapter 
 
 If a chapter consists primarily of introductory or transitional text with no substantive factual claims to verify, state that briefly rather than forcing an analysis.
 
-The output must be entirely in Persian (Farsi). Use Persian numerals (۰-۹) for all digits in the output body text. Do not include any timestamps. Copy chapter titles exactly from the input — do not reword, translate, or rephrase them. Do not drop or merge any chapter sections; every chapter present in the input must appear in the output.
+The output must be entirely in Persian (Farsi). Use simple, natural language suitable for Iranian readers. Avoid unnecessarily difficult words and unnecessary English terms — the entire output must be in Persian with no untranslated English words or phrases. Use Persian numerals (۰-۹) for all digits in the output body text. Do not include any timestamps. Copy chapter titles exactly from the input — do not reword, translate, or rephrase them. Do not drop or merge any chapter sections; every chapter present in the input must appear in the output.
 
 The output structure should be like this (but in Persian):
 
