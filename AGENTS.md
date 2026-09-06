@@ -17,8 +17,6 @@ This is a static Persian (Farsi) website that presents blog-style Persian summar
 
 ## Project Structure
 
-TODO: Add other files and folders.
-
 ```
 mearsheimer/
 ├── content/                    # Persian blog posts for the website
@@ -28,14 +26,18 @@ mearsheimer/
 │   └── episode-N.txt           # Video URL + title + description + chapters for episode N (metadata source)
 ├── transcript/                 # Downloaded YouTube subtitles (reference)
 │   └── episode-N.srt           # Subtitles for episode N
+├── processed/                  # Minified subtitle files for model input (generated)
+│   └── episode-N.md            # Minified transcript for episode N (generated with scripts/process_transcripts.py)
 ├── prompts/
 │   └── generate-post.md        # System prompt used to generate Persian posts from videos
+├── scripts/
+│   └── process_transcripts.py  # Minifies info + SRT into processed/episode-N.md
 ├── .github/
 │   └── copilot-instructions.md # Points to AGENTS.md
 ├── robots.txt                  # Crawler rules
 ├── AGENTS.md                   # Agent instructions (this file)
 ├── CLAUDE.md                   # Points to AGENTS.md
-├── README.md                   # Project overview and workflow docs
+├── README.md                   # Project overview
 └── LICENSE                     # License file
 ```
 
@@ -69,6 +71,17 @@ Each `info/episode-N.txt` is structured as follows:
 1. The cue number (starting at 1).
 2. A timestamp line: `HH:MM:SS,mmm --> HH:MM:SS,mmm`.
 3. One or more lines of subtitle text.
+
+## Processed File Format
+
+`processed/episode-N.md` is the minified subtitle content used as model input when generating the Persian post. It is generated from the chapters in `info/episode-N.txt` and the subtitles in `transcript/episode-N.srt` by `scripts/process_transcripts.py`. Its structure is:
+
+1. The first line is the H1 heading `# {VIDEO TITLE}` (the English video title from the info file).
+2. The video URL.
+3. For episodes with chapters, each section starts with an H2 heading `## {mm:ss} - {TITLE}`, followed by the concatenated subtitle text of that chapter (cue numbers and per-cue timestamps are stripped).
+4. For the chapter-free introduction episode (episode 0), there are no sections; the body is the entire transcript's text as a single text block.
+
+Every section heading must be followed by a blank line.
 
 ## Content Format
 
