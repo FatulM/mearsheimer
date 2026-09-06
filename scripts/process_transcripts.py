@@ -4,8 +4,8 @@ Minify SRT subtitles into processed/episode-N.md files.
 
 Reads the video title and chapter info from info/episode-N.txt and the
 matching transcript/episode-N.srt, then writes processed/episode-N.md
-with the video title, its link, and each chapter's subtitles concatenated
-into a single text block under a `## {mm:ss} - {TITLE}` heading.
+with the video title and each chapter's subtitles concatenated into a
+single text block under a `## {mm:ss} - {TITLE}` heading.
 Episodes without chapters (e.g. the channel introduction) are written as
 a single text block instead.
 
@@ -28,12 +28,12 @@ SEPARATOR_RE = re.compile(r"^—+|-{3,}$")
 TS_LINE_RE = re.compile(r"^(\d{1,2}):(\d{2}):(\d{2}),\d{3}\s*-->")
 
 
-def parse_info(info_path: Path) -> tuple:
-    """Extract (video_url, video_title) from the first two non-empty lines."""
+def parse_info(info_path: Path) -> str:
+    """Extract the video title from the second non-empty line."""
     lines = [
         ln.strip() for ln in info_path.read_text("utf-8").splitlines() if ln.strip()
     ]
-    return lines[0], lines[1]
+    return lines[1]
 
 
 def parse_chapters(info_path: Path) -> list:
@@ -103,8 +103,8 @@ def chapter_index(seconds: int, boundaries: list) -> int:
     return len(boundaries) - 1
 
 
-def minify(url: str, title: str, cues: list, chapters: list) -> str:
-    head = f"# {title}\n\n{url}"
+def minify(title: str, cues: list, chapters: list) -> str:
+    head = f"# {title}"
     if not chapters:
         return f"{head}\n\n{' '.join(text for _, text in cues)}"
     boundaries = [to_seconds(ts) for ts, _ in chapters]
@@ -128,10 +128,10 @@ def main() -> None:
             print(f"[skip] episode-{n}: transcript missing")
             continue
         chapters = parse_chapters(info_path)
-        url, title = parse_info(info_path)
+        title = parse_info(info_path)
         cues = parse_srt(srt_path)
         out_path = PROCESSED_DIR / f"episode-{n}.md"
-        out_path.write_text(minify(url, title, cues, chapters) + "\n", "utf-8")
+        out_path.write_text(minify(title, cues, chapters) + "\n", "utf-8")
         label = "no chapters" if not chapters else f"{len(chapters)} chapters"
         print(f"[ok] processed/episode-{n}.md ({label})")
 

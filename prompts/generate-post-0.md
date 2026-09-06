@@ -1,13 +1,11 @@
 Generate a Persian (Farsi) blog post for the channel introduction video.
 
-You will be given the exact details of the introduction video: the video title, the video URL, and the full transcript as a single text block. Use only the details provided; do not watch or fetch the video yourself.
+You will be given the exact details of the introduction video: the video title and the full transcript as a single text block. Use only the details provided; do not watch or fetch the video yourself.
 
 The input will be structured like this (in English):
 
 ```markdown
 # {VIDEO TITLE}
-
-{VIDEO URL}
 
 {TEXT}
 ```

@@ -1,13 +1,11 @@
 Generate a Persian (Farsi) blog post for a video with chapters.
 
-You will be given the exact details of the video: the video title, the video URL, and each chapter with its starting timestamp and the concatenated subtitle text of that chapter. Use only the details provided; do not watch or fetch the video yourself.
+You will be given the exact details of the video: the video title and each chapter with its starting timestamp and the concatenated subtitle text of that chapter. Use only the details provided; do not watch or fetch the video yourself.
 
 The input will be structured like this (in English):
 
 ```markdown
 # {VIDEO TITLE}
-
-{VIDEO URL}
 
 ## {mm:ss start of the chapter 1 timestamp} - {CHAPTER 1 TITLE}
 

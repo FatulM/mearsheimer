@@ -1,7 +1,5 @@
 # Episode 3: Iran Has Trump Over A Barrel
 
-https://www.youtube.com/watch?v=XdcyNELIqvw
-
 ## 00:00 - Introduction
 
 The Iranians are saying these issues are non-negotiable. These are demands. We are demanding that you meet every one of these ten demands. The West is leading Ukraine down the primrose path, and the Israelis are executing a genocide in Gaza. It's not China's fault that it wants to be powerful. So if you get into trouble and you dial 911, there's nobody at the other

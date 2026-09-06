@@ -1,7 +1,5 @@
 # Episode 4: The MOU Is Dead! Can a Blockade Save Us?
 
-https://www.youtube.com/watch?v=nAD9BZ5NAuM
-
 ## 00:00 - Introduction
 
 If the first blockade failed, why should we expect the second blockade to succeed? What's changed here? The West is leading Ukraine down the primrose path the Israelis are executing a genocide in Gaza. It's not China's fault that it wants to be powerful. So if you get into trouble and you dial 911, there's nobody at the other end.

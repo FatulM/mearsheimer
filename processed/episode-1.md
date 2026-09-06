@@ -1,7 +1,5 @@
 # Episode 1: Origins of the War In Ukraine
 
-https://www.youtube.com/watch?v=0LmCveTM788
-
 ## 00:00 - Introduction
 
 Putin felt that Russia faced an existential threat. He had to deal with that threat. And the United States and the Europeans were doing nothing to negotiate a way to avoid war. The West is leading Ukraine down the primrose path, and the Israelis are executing a genocide in Gaza. It's not China's fault that it wants to be powerful. So if you get into trouble and you dial 911, there's nobody at the other end.

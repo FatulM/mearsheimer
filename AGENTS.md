@@ -63,7 +63,7 @@ mearsheimer/
 
 ## Model Requirements for Post Generation
 
-- `prompts/generate-post-0.md` and `prompts/generate-post-N.md` are used when the model is given the video details from `processed/episode-0.md` / `processed/episode-N.md` (the video title, URL, and transcript text or chapters). These work with any model; no native YouTube access is required.
+- `prompts/generate-post-0.md` and `prompts/generate-post-N.md` are used when the model is given the video details from `processed/episode-0.md` / `processed/episode-N.md` (the video title and the transcript text or chapters). These work with any model; no native YouTube access is required.
 - `prompts/web-generate-posts.md` and `prompts/web-generate-posts-N.md` are written for **Gemini** models, which have native access to YouTube videos (title, description, chapters, and transcripts) from just the video URL. The user provides the video link and the chapters copied from the video description. The best model for this task as of today is **Gemini 3.1 Pro**.
 - When using a non-Gemini model (or any model without native YouTube access), the prompt must be slightly adapted: pass the downloaded `transcript/episode-N.srt` subtitles into the prompt alongside the video URL and chapters.
 
@@ -98,9 +98,8 @@ Each `info/episode-N.txt` is structured as follows:
 `processed/episode-N.md` is the minified subtitle content used as model input when generating the Persian post. It is generated from the chapters in `info/episode-N.txt` and the subtitles in `transcript/episode-N.srt` by `scripts/process_transcripts.py`. Its structure is:
 
 1. The first line is the H1 heading `# {VIDEO TITLE}` (the English video title from the info file).
-2. The video URL.
-3. For episodes with chapters, each section starts with an H2 heading `## {mm:ss} - {TITLE}`, followed by the concatenated subtitle text of that chapter (cue numbers and per-cue timestamps are stripped).
-4. For the chapter-free introduction episode (episode 0), there are no sections; the body is the entire transcript's text as a single text block.
+2. For episodes with chapters, each section starts with an H2 heading `## {mm:ss} - {TITLE}`, followed by the concatenated subtitle text of that chapter (cue numbers and per-cue timestamps are stripped).
+3. For the chapter-free introduction episode (episode 0), there are no sections; the body is the entire transcript's text as a single text block.
 
 Every section heading must be followed by a blank line.
 
@@ -131,7 +130,7 @@ After downloading, rename the resulting `.srt` file to `transcript/episode-N.srt
 ```
 LLM_BASE_URL=https://api.avalai.org/v1
 LLM_API_KEY=aa-FILL_ME_IN
-LLM_MODEL=gpt-5.6-luna
+LLM_MODEL=gemini-3.8-flash
 ```
 
 `scripts/create_content.py` reads the minified transcript, sends it to the model as the user content with the matching prompt in `prompts/` as the system prompt, and writes the Model output to `content/episode-N.md`.

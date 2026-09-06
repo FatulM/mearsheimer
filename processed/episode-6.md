@@ -1,7 +1,5 @@
 # Episode 6: Why Ukraine Is Doomed
 
-https://www.youtube.com/watch?v=JzSq74Xwrqk
-
 ## 00:00 - Intro
 
 done, I would strongly encourage people not to believe what they read in the mainstream media about how well Ukraine is doing in this war and how poorly Russia is doing, The West is leading Ukraine down the primrose path, and the Israelis are executing a genocide in Gaza. It's not China's fault that it wants to be powerful. So if you get into trouble and you dial 911, there's nobody at the other end.

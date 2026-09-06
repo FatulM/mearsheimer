@@ -1,7 +1,5 @@
 # Episode 5: The False Promise of Tactical Nuclear Weapons
 
-https://www.youtube.com/watch?v=Cc6zJaHNaD4
-
 ## 00:00 - Introduction
 
 But what you could do with nuclear weapons is use a small number of them to convince the other side that you were deadly serious The West is leading Ukraine down the primrose path, and the Israelis are executing a genocide in Gaza. It's not China's fault that it wants to be powerful. So if you get into trouble and you dial 911, there's nobody at the other end.
