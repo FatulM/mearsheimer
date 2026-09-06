@@ -30,7 +30,9 @@ TS_LINE_RE = re.compile(r"^(\d{1,2}):(\d{2}):(\d{2}),\d{3}\s*-->")
 
 def parse_info(info_path: Path) -> tuple:
     """Extract (video_url, video_title) from the first two non-empty lines."""
-    lines = [ln.strip() for ln in info_path.read_text("utf-8").splitlines() if ln.strip()]
+    lines = [
+        ln.strip() for ln in info_path.read_text("utf-8").splitlines() if ln.strip()
+    ]
     return lines[0], lines[1]
 
 
