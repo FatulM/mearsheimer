@@ -47,42 +47,32 @@ pip install -r requirements.txt
 
 ```
 mearsheimer/
-├── content/                    # Persian blog posts for the website
-│   └── episode-N.md            # Persian blog post for episode N (generated with prompts/generate-post-0.md or generate-post-N.md)
-├── info/                       # Episode and channel metadata
-│   ├── channel.txt             # Channel metadata (URL, title, description)
-│   └── episode-N.txt           # Video URL + title + description + chapters for episode N (metadata source)
-├── transcript/                 # Downloaded YouTube subtitles (reference)
-│   └── episode-N.srt           # Subtitles for episode N
-├── processed/                  # Minified subtitle files for model input (generated)
-│   └── episode-N.md            # Minified transcript for episode N (generated with scripts/process_transcripts.py)
-├── prompts/
-│   ├── generate-post-0.md      # System prompt for generating the Persian intro post from processed/episode-0.md
-│   ├── generate-post-N.md      # System prompt for generating Persian posts from processed/episode-N.md (N≥1)
-│   ├── web-generate-posts.md   # System prompt (for models with YouTube/web access) covering both the intro and N≥1 videos
-│   └── web-generate-posts-N.md # System prompt (for models with YouTube/web access) for N≥1 videos from link + chapters
-├── scripts/
-│   ├── process_transcripts.py  # Minifies info + SRT into processed/episode-N.md
-│   ├── create_content.py       # Generates content/episode-N.md via the .env-configured LLM endpoint
-│   ├── check_timestamps.py     # Validates content/episode-N.md section timestamps against info/episode-N.txt chapters
-│   └── build_site.py           # Deterministically converts content/*.md into the static RTL site under www/
+├── content/                    # Persian blog posts (episode-N.md)
+├── info/                       # Channel + episode metadata (URL, title, chapters)
+├── transcript/                 # Downloaded YouTube subtitles (episode-N.srt)
+├── processed/                  # Minified transcripts for model input (episode-N.md)
+├── prompts/                    # Reusable system prompts for post generation
+├── scripts/                    # Python tooling (process, create, check, build)
 ├── requirements.txt            # Python dependencies
 ├── www/                        # Static site root (published via GitHub Pages)
-│   ├── index.html              # Homepage: episode-0 intro article + links to episode pages
-│   ├── episode-N.html          # One generated page per episode (N≥1)
-│   ├── assets/                 # Site assets; assets/style.css is the shared stylesheet
+│   ├── index.html              # Homepage: episode-0 intro + episode links
+│   ├── episode-N.html          # One page per episode (N≥1)
+│   ├── assets/                 # Site assets; style.css is the shared stylesheet
 │   └── robots.txt              # Crawler rules
-├── .github/
+├── .gitignore                  # Git ignore rules
+├── _config.yml                 # Jekyll/GitHub Pages site config
+├── .github/                    # GitHub related configs
 │   └── copilot-instructions.md # Points to AGENTS.md
-├── .agents/
-│   └── skills/
-│       └── site-styling/       # LLM skill: themes the generated site (CSS + page shell)
-├── .env.example                # Committed template for the gitignored .env (LLM endpoint config)
+├── .agents/                    # Agent related files
+│   └── skills/                 # Agent skills
+│       └── site-styling/       # LLM skill: themes the generated site
+├── .env                        # Gitignored LLM endpoint config (see .env.example)
+├── .env.example                # Committed template for the gitignored .env
 ├── AGENTS.md                   # Agent instructions (this file)
 ├── CLAUDE.md                   # Points to AGENTS.md
 ├── README.md                   # Project overview
-├── COPYRIGHT.md                # Copyright and disclaimer notice for extracted YouTube materials
-└── LICENSE                     # BSD 3-Clause license for the repository code
+├── COPYRIGHT.md                # Copyright notice for extracted materials
+└── LICENSE                     # BSD 3-Clause license for the repo code
 ```
 
 ## Model Requirements for Post Generation
