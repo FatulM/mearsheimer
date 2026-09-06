@@ -62,9 +62,12 @@ mearsheimer/
 │   └── web-generate-posts-N.md # System prompt (for models with YouTube/web access) for N≥1 videos from link + chapters
 ├── scripts/
 │   ├── process_transcripts.py  # Minifies info + SRT into processed/episode-N.md
-│   └── create_content.py       # Generates content/episode-N.md via the .env-configured LLM endpoint
+│   ├── create_content.py       # Generates content/episode-N.md via the .env-configured LLM endpoint
+│   └── check_timestamps.py     # Validates content/episode-N.md section timestamps against info/episode-N.txt chapters
 ├── requirements.txt            # Python dependencies
 ├── www/                        # Static site root (published via GitHub Pages)
+│   ├── index.html              # Landing page
+│   ├── assets/                 # Site assets
 │   └── robots.txt              # Crawler rules
 ├── .github/
 │   └── copilot-instructions.md # Points to AGENTS.md
@@ -72,7 +75,8 @@ mearsheimer/
 ├── AGENTS.md                   # Agent instructions (this file)
 ├── CLAUDE.md                   # Points to AGENTS.md
 ├── README.md                   # Project overview
-└── LICENSE                     # License file
+├── COPYRIGHT.md                # Copyright and disclaimer notice for extracted YouTube materials
+└── LICENSE                     # BSD 3-Clause license for the repository code
 ```
 
 ## Model Requirements for Post Generation
