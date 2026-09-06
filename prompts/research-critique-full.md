@@ -57,11 +57,11 @@ The output structure should be like this (but in Persian):
 
 {Overall assessment of the post: a summary of its general accuracy, key strengths, key weaknesses, and an overall rating}
 
-# {CHAPTER 1 TITLE IN PERSIAN}
+## {CHAPTER 1 TITLE IN PERSIAN}
 
 {Assessment of chapter 1: summary of claims, research findings, and verdict on accuracy}
 
-# {CHAPTER 2 TITLE IN PERSIAN}
+## {CHAPTER 2 TITLE IN PERSIAN}
 
 {Assessment of chapter 2: summary of claims, research findings, and verdict on accuracy}
 ```
