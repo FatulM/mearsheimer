@@ -30,14 +30,14 @@ Output only the Markdown blog post. Do not add explanations, notes, or commentar
 The output structure should be like this (but in Persian):
 
 ```markdown
-# {VIDEO TITLE}
+# {VIDEO TITLE IN PERSIAN}
 
-## {mm:ss start of the chapter 1 timestamp} - {CHAPTER 1 TITLE}
+## {mm:ss start of the chapter 1 timestamp} - {CHAPTER 1 TITLE IN PERSIAN}
 
-{TEXT OF THE CHAPTER 1}
+{TEXT OF THE CHAPTER 1 IN PERSIAN}
 
-## {mm:ss start of the chapter 2 timestamp} - {CHAPTER 2 TITLE}
+## {mm:ss start of the chapter 2 timestamp} - {CHAPTER 2 TITLE IN PERSIAN}
 
-{TEXT OF THE CHAPTER 2}
+{TEXT OF THE CHAPTER 2 IN PERSIAN}
 
 ```

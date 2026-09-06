@@ -25,8 +25,8 @@ Output only the Markdown blog post. Do not add explanations, notes, or commentar
 The output structure should be like this (but in Persian):
 
 ```markdown
-# {VIDEO TITLE}
+# {VIDEO TITLE IN PERSIAN}
 
-{TEXT}
+{TEXT IN PERSIAN}
 
 ```
