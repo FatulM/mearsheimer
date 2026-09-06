@@ -62,7 +62,7 @@ mearsheimer/
 ├── scripts/
 │   ├── process_transcripts.py  # Minifies info + SRT into processed/episode-N.md
 │   └── create_content.py       # Generates content/episode-N.md via the .env-configured LLM endpoint
-├── requirements.txt            # Python dependencies (openai, python-dotenv, requests, ruff)
+├── requirements.txt            # Python dependencies
 ├── .github/
 │   └── copilot-instructions.md # Points to AGENTS.md
 ├── .env.example                # Committed template for the gitignored .env (LLM endpoint config)
@@ -89,7 +89,7 @@ Each `info/episode-N.txt` is structured as follows:
 
 1. The video URL (first line).
 2. The video title.
-3. The video description, which spans multiple lines and contains the chapters info (a `Chapters` section listing `{mm:ss} {TITLE}` lines, preceded by a dash separator line).
+3. The video description, which spans multiple lines and contains the chapters info (a `Chapters` section listing `{m:ss} {TITLE}` lines, preceded by a dash separator line). Timestamps here use `m:ss`, i.e. minutes with no leading zero.
 
 `info/channel.txt` is structured as follows:
 
@@ -110,7 +110,7 @@ Each `info/episode-N.txt` is structured as follows:
 `processed/episode-N.md` is the minified subtitle content used as model input when generating the Persian post. It is generated from the chapters in `info/episode-N.txt` and the subtitles in `transcript/episode-N.srt` by `scripts/process_transcripts.py`. Its structure is:
 
 1. The first line is the H1 heading `# {VIDEO TITLE}` (the English video title from the info file).
-2. For episodes with chapters, each section starts with an H2 heading `## {mm:ss} - {TITLE}`, followed by the concatenated subtitle text of that chapter (cue numbers and per-cue timestamps are stripped).
+2. For episodes with chapters, each section starts with an H2 heading `## {mm:ss} - {TITLE}`, followed by the concatenated subtitle text of that chapter (cue numbers and per-cue timestamps are stripped). Timestamps here are normalised to `mm:ss` (minutes with a leading zero when needed).
 3. For the chapter-free introduction episode (episode 0), there are no sections; the body is the entire transcript's text as a single text block.
 
 Every section heading must be followed by a blank line.
