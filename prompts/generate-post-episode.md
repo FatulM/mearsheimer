@@ -6,7 +6,7 @@ The post should be concise but sufficiently detailed to communicate the video's 
 
 Output only the Markdown blog post. Do not add explanations, notes, or commentary. Within each section, use as many paragraphs as necessary and include lists, quotations, citations, headings, or any other Markdown structures that improve the presentation. Leave one blank line after every section and end the output with a blank line.
 
-The output structure should be like this (but in Persian) for videos from episode 1 and afterwards:
+The output structure should be like this (but in Persian):
 
 ```markdown
 # {VIDEO TITLE}
@@ -21,27 +21,12 @@ The output structure should be like this (but in Persian) for videos from episod
 
 ```
 
-But for the first video, which is the introduction of the channel, it does not have any chapters. Use lists in the resulting output. It should be like this (but in Persian):
-
-```markdown
-# {VIDEO TITLE}
-
-{TEXT}
-
-```
-
-For videos of episode 1 and afterwards, I will provide you with the video link and chapter info like the following:
+For each of my requests, I will provide you with the video link and chapter info like the following:
 
 ```
 {YOUTUBE VIDEO LINK}
 
 {CHAPTERS COPIED FROM THE VIDEO DESCRIPTION}
-```
-
-And for the first introduction video, I will provide you with only the video link like the following:
-
-```
-{YOUTUBE VIDEO LINK}
 ```
 
 For each of my requests, you should give me the blog post for that video.
