@@ -4,6 +4,20 @@
 
 This is a static Persian (Farsi) website that presents blog-style Persian summaries of the videos from [John Mearsheimer's YouTube channel](https://www.youtube.com/@JohnMearsheimer). Each episode of the channel becomes a Persian blog post on the website, linked to the original YouTube video. The website will be hosted on GitHub Pages.
 
+## Environment
+
+- Python 3.12 venv at `.venv/` folder.
+- Always activate: `source .venv/bin/activate`
+- Work dir is repo root.
+
+## Commands
+
+- Install deps: `pip install -r requirements.txt`
+- Format: `ruff format scripts`
+- Check formatting: `ruff format --check scripts`
+- Lint: `ruff check scripts`
+- Validate imports: `python -m compileall scripts`
+
 ## Conventions
 
 - Never commit, stage, reset, or discard changes unless explicitly requested. Preserve unrelated user changes.
@@ -35,7 +49,9 @@ mearsheimer/
 │   ├── web-generate-posts.md   # System prompt (for models with YouTube/web access) covering both the intro and N≥1 videos
 │   └── web-generate-posts-N.md # System prompt (for models with YouTube/web access) for N≥1 videos from link + chapters
 ├── scripts/
-│   └── process_transcripts.py  # Minifies info + SRT into processed/episode-N.md
+│   ├── process_transcripts.py  # Minifies info + SRT into processed/episode-N.md
+│   └── create_content.py       # Generates content/episode-N.md via the .env-configured LLM endpoint
+├── requirements.txt            # Python dependencies (openai, python-dotenv, requests, ruff)
 ├── .github/
 │   └── copilot-instructions.md # Points to AGENTS.md
 ├── robots.txt                  # Crawler rules
@@ -107,3 +123,15 @@ yt-dlp --cookies-from-browser chrome --write-auto-sub --convert-subs=srt --skip-
 ```
 
 After downloading, rename the resulting `.srt` file to `transcript/episode-N.srt` for episode N.
+
+## LLM Environment
+
+`.env` configures the OpenAI-compatible endpoint used by `scripts/create_content.py`. It is gitignored; `.env.example` is the committed template.
+
+```
+LLM_BASE_URL=https://api.avalai.org/v1
+LLM_API_KEY=aa-FILL_ME_IN
+LLM_MODEL=gpt-5.6-luna
+```
+
+`scripts/create_content.py` reads the minified transcript, sends it to the model as the user content with the matching prompt in `prompts/` as the system prompt, and writes the Model output to `content/episode-N.md`.
