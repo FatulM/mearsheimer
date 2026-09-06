@@ -10,6 +10,17 @@ This is a static Persian (Farsi) website that presents blog-style Persian summar
 - Always activate: `source .venv/bin/activate`
 - Work dir is repo root.
 
+## Environment Setup
+
+Creating the environment is done manually by the user.
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+pip install -r requirements.txt
+```
+
 ## Commands
 
 - Install deps: `pip install -r requirements.txt`
@@ -25,7 +36,7 @@ This is a static Persian (Farsi) website that presents blog-style Persian summar
 - Markdown documents have no line-length limit.
 - Markdown headings must be followed by a blank line.
 - All textual files, including code and documents, must end with a newline.
-- Skills are in the `.agents/skills/` folder.
+- Project-specific skills are in the `.agents/skills/` folder.
 - All website content will be in Persian (Farsi) language for Iranian Readers unless explicitly requested otherwise.
 - HTML/CSS/JS changes should maintain RTL layout and Vazirmatn font usage.
 - Content updates should be made first to source `.md` files then reflected in html `.html` files.
@@ -54,6 +65,7 @@ mearsheimer/
 ├── requirements.txt            # Python dependencies (openai, python-dotenv, requests, ruff)
 ├── .github/
 │   └── copilot-instructions.md # Points to AGENTS.md
+├── .env.example                # Committed template for the gitignored .env (LLM endpoint config)
 ├── robots.txt                  # Crawler rules
 ├── AGENTS.md                   # Agent instructions (this file)
 ├── CLAUDE.md                   # Points to AGENTS.md
@@ -64,12 +76,12 @@ mearsheimer/
 ## Model Requirements for Post Generation
 
 - `prompts/generate-post-0.md` and `prompts/generate-post-N.md` are used when the model is given the video details from `processed/episode-0.md` / `processed/episode-N.md` (the video title and the transcript text or chapters). These work with any model; no native YouTube access is required.
-- `prompts/web-generate-posts.md` and `prompts/web-generate-posts-N.md` are written for **Gemini** models, which have native access to YouTube videos (title, description, chapters, and transcripts) from just the video URL. The user provides the video link and the chapters copied from the video description. The best model for this task as of today is **Gemini 3.1 Pro**.
+- `prompts/web-generate-posts.md` and `prompts/web-generate-posts-N.md` are written for **Gemini** models, which have native access to YouTube videos (title, description, chapters, and transcripts) from just the video URL. The user provides the video link and the chapters copied from the video description. These prompts are used manually in a chat with the best model for this task as of today, **Gemini 3.1 Pro**; this is separate from the `LLM_MODEL` configured in `.env`, which `scripts/create_content.py` uses for the transcript-based pipeline.
 - When using a non-Gemini model (or any model without native YouTube access), the prompt must be slightly adapted: pass the downloaded `transcript/episode-N.srt` subtitles into the prompt alongside the video URL and chapters.
 
 ## Episodes
 
-- Episode 0 is the channel introduction video. It has no chapters, so `info/episode-0.txt` contains only the video URL and its post follows the chapter-free list-based format described in `prompts/generate-post-0.md`.
+- Episode 0 is the channel introduction video. It has no chapters, so `info/episode-0.txt` holds the URL, title, and description without a chapters section, and its post follows the chapter-free list-based format described in `prompts/generate-post-0.md`.
 
 ## Info File Format
 
@@ -107,7 +119,7 @@ Every section heading must be followed by a blank line.
 
 `content/episode-N.md` is a Persian Markdown blog post with the following structure:
 
-1. The first line is the H1 heading `# {VIDEO TITLE}`.
+1. The first line is the H1 heading `# {VIDEO TITLE}`, with the title translated into Persian rather than the English title. The episode page title is taken from this H1.
 2. For episodes with chapters, each section starts with an H2 heading `## {mm:ss} - {TITLE}`. The pipeline converts the timestamp into a link to the matching moment of the YouTube video.
 3. For the chapter-free introduction episode (episode 0), there are no sections; the body uses lists instead.
 
@@ -134,3 +146,10 @@ LLM_MODEL=gemini-3.8-flash
 ```
 
 `scripts/create_content.py` reads the minified transcript, sends it to the model as the user content with the matching prompt in `prompts/` as the system prompt, and writes the Model output to `content/episode-N.md`.
+
+## Content Pipeline
+
+1. Extract video metadata (URL, title, description, chapters) into `info/episode-N.txt`.
+2. Download subtitles with yt-dlp into `transcript/episode-N.srt` (see Subtitle Extraction).
+3. Run `python3 scripts/process_transcripts.py` to generate `processed/episode-N.md`.
+4. Run `python3 scripts/create_content.py N` to generate the Persian blog post `content/episode-N.md`, reading `processed/episode-N.md` and the matching system prompt (`prompts/generate-post-0.md` for episode 0, `prompts/generate-post-N.md` for N≥1) and calling the OpenAI-compatible endpoint configured in `.env`.
