@@ -1,17 +1,17 @@
-# John Mearsheimer's YouTube Channel Perisan Blog
+# وبلاگ فارسی کانال یوتیوب جان میرشایمر
 
-A static Persian (Farsi) website that publishes blog-style Persian summaries of the videos on [John Mearsheimer's YouTube channel](https://www.youtube.com/@JohnMearsheimer).
+یک وب‌سایت استاتیک فارسی که خلاصه‌ی ویدیوهای [کانال یوتیوب جان میرشایمر](https://www.youtube.com/@JohnMearsheimer) را به صورت پست‌های وبلاگی منتشر می‌کند.
 
-## Documentation
+## مستندات
 
-See [AGENTS.md](AGENTS.md) for the full project structure, content pipeline, file formats, and agent conventions.
+برای دیدن ساختار کامل پروژه، مسیر تولید محتوا، قالب فایل‌ها و قوانین دستیارها، فایل [AGENTS.md](AGENTS.md) را ببینید.
 
-## Copyright
+## حق نشر (کپی‌رایت)
 
-This is a non-commercial educational tool that uses publicly available materials from YouTube. See [COPYRIGHT.md](COPYRIGHT.md) before using the contents of this repository.
+این ابزار غیرتجاری و آموزشی است و از مطالب عمومی یوتیوب استفاده می‌کند. لطفاً قبل از استفاده از محتوای این مخزن، فایل [COPYRIGHT.md](COPYRIGHT.md) را مطالعه کنید.
 
-## License
+## مجوزها
 
-- **Code** (the `scripts/` folder and repository tooling): licensed under the [BSD 3-Clause License](LICENSE). You may use, modify, and redistribute the code provided you keep the copyright notice and follow the license terms.
-- **Extracted materials** (video metadata in `info/`, subtitles in `transcript/` and `processed/`): not covered by the repository license; they remain the property of their original copyright holders and are included under fair-use/fair-dealing principles for education and commentary.
-- **Persian summaries** (`content/` and the generated site in `docs/`): offered freely for non-commercial educational use, with attribution to the original videos.
+* **کدها** (پوشه‌ی `scripts/` و ابزارهای پروژه): تحت مجوز [BSD 3-Clause License](https://www.google.com/search?q=LICENSE) منتشر شده‌اند. شما می‌توانید با حفظ نام صاحب اثر و رعایت قوانین مجوز، از کدها استفاده کنید، آن‌ها را تغییر دهید یا به اشتراک بگذارید.
+* **محتوای استخراج‌شده** (اطلاعات ویدیوها در پوشه‌ی `info/` و زیرنویس‌ها در پوشه‌های `transcript/` و `processed/`): شامل مجوز کدها نمی‌شوند. این موارد متعلق به صاحبان اصلی اثر هستند و صرفاً برای استفاده‌ی منصفانه‌ی آموزشی و تحلیل آورده شده‌اند.
+* **خلاصه‌های فارسی** (محتوای پوشه‌ی `content/` و سایت ساخته‌شده در پوشه‌ی `docs/`): برای استفاده‌های آموزشی و غیرتجاری به صورت رایگان ارائه شده‌اند، به شرطی که نام منبع اصلی (ویدیوها) ذکر شود.
