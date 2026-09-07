@@ -2,6 +2,16 @@
 
 A static Persian (Farsi) website that publishes blog-style Persian summaries of the videos on [John Mearsheimer's YouTube channel](https://www.youtube.com/@JohnMearsheimer).
 
+> **Very important note about content quality and critiques**
+> Due to financial constraints and the high cost of advanced AI models (such as GPT-5.6), different parts of this project — especially the "reviews and critiques" pages — were produced with cheaper, more basic models. For this reason:
+> * The critique pages may be inaccurate, lack detail, or be incomplete.
+> * Because the cheaper models do not have access to live search tools, some of the content and critiques may not be up to date.
+> 
+> 
+> Using more powerful models would undoubtedly significantly improve the quality of the translations, summaries, and especially the critical analyses on this website. **If you can provide financial support or grant access to advanced model APIs, I would be happy to hear from you.**
+> **Project goal:**
+> The main goal of this website is to make key international analyses easier for Persian speakers to access and to help them better understand social, political, and international relations issues. I hope this small step helps bring clarity to the complex perspectives of today's world.
+
 ## Documentation
 
 See [AGENTS.md](AGENTS.md) for the full project structure, content pipeline, file formats, and agent conventions.
