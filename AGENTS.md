@@ -64,6 +64,7 @@ mearsheimer/
 │   ├── critique_content.py         # content (+transcript) → critique/episode-N.md
 │   ├── check_timestamps.py         # Validate chapter timestamps
 │   ├── check_critiques.py          # Validate critique structure vs content
+│   ├── check_web_tool.py           # Test whether the endpoint runs web search
 │   ├── strip_timestamps.py         # Strip mm:ss prefixes from section headings
 │   └── build_site.py               # Markdown → static site (docs/)
 ├── requirements.txt                # Python dependencies

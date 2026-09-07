@@ -93,6 +93,27 @@ def check_endpoint(base_url: str, api_key: str) -> None:
         print(f"[warn] preflight check against {base_url}/models failed: {exc}")
 
 
+def report_tool_usage(response) -> None:
+    """Report whether the web_search hosted tool actually ran."""
+    try:
+        tools = response.usage.tools
+        if tools is not None and hasattr(tools, "web_search_tool"):
+            ws = tools.web_search_tool
+            searches = getattr(ws, "searches", 0)
+            sessions = getattr(ws, "sessions", 0)
+            print(
+                f"[ok] web_search tool ran: {searches} searches in {sessions} sessions"
+            )
+            return
+    except AttributeError:
+        pass
+    print(
+        "[warn] no web_search tool usage reported — the endpoint may have "
+        "silently ignored the tools parameter (model may have answered "
+        "from memory only)"
+    )
+
+
 def generate(
     base_url: str, api_key: str, model: str, system_prompt: str, user_content: str
 ) -> str:
@@ -107,6 +128,7 @@ def generate(
         ],
         tools=[{"type": "web_search"}],
     )
+    report_tool_usage(response)
     content = response.choices[0].message.content
     if not content:
         sys.exit("[error] the model returned an empty response")
