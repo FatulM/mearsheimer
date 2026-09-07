@@ -48,7 +48,7 @@ Structure your output as a structured, comparative assessment. For each chapter 
 
 If a chapter consists primarily of introductory or transitional text with no substantive factual claims to verify, state that briefly rather than forcing an analysis.
 
-The output must be entirely in Persian (Farsi). Use simple, natural language suitable for Iranian readers. Avoid unnecessarily difficult words and unnecessary English terms — the entire output must be in Persian with no untranslated English words or phrases. Use Persian numerals (۰-۹) for all digits in the output body text. Do not include any timestamps. Copy chapter titles exactly from the input — do not reword, translate, or rephrase them. Do not drop or merge any chapter sections; every chapter present in the input must appear in the output.
+The output must be entirely in Persian (Farsi). Use simple, natural language suitable for Iranian readers. Avoid unnecessarily difficult words and unnecessary English terms — the entire output must be in Persian with no untranslated English words or phrases. Use English digits (0-9) for the timestamps in chapter headings, but use Persian numerals (۰-۹) for any digits that appear in the Persian body text. Copy each chapter heading exactly from the input — the heading must remain identical to the input's `## {mm:ss} - {TITLE}`, keeping the timestamp and the title verbatim with no rewording, translation, or rephrasing. Do not drop or merge any chapter sections; every chapter present in the input must appear in the output.
 
 The output structure should be like this (but in Persian):
 
@@ -57,11 +57,11 @@ The output structure should be like this (but in Persian):
 
 {Overall assessment of the post: a summary of its general accuracy, key strengths, key weaknesses, and an overall rating}
 
-## {CHAPTER 1 TITLE IN PERSIAN}
+## {mm:ss} - {CHAPTER 1 TITLE IN PERSIAN}
 
 {Assessment of chapter 1: summary of claims, research findings, and verdict on accuracy}
 
-## {CHAPTER 2 TITLE IN PERSIAN}
+## {mm:ss} - {CHAPTER 2 TITLE IN PERSIAN}
 
 {Assessment of chapter 2: summary of claims, research findings, and verdict on accuracy}
 ```
