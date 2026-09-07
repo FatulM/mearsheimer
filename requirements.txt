@@ -3,4 +3,4 @@ python-dotenv>=1.2,<2
 requests>=2.34,<3
 
 # Only for development:
-ruff>=0.16,<1
+ruff>=0.16,<0.17
