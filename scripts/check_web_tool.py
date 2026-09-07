@@ -63,9 +63,24 @@ def report_tool_usage(response) -> None:
             return
     except AttributeError:
         pass
+
+    try:
+        annotations = [
+            a.url_citation.url
+            for a in (response.choices[0].message.annotations or [])
+            if getattr(a, "type", None) == "url_citation"
+        ]
+    except AttributeError:
+        annotations = []
+    if annotations:
+        print(f"[ok] web_search tool ran: {len(annotations)} URL citation(s) returned")
+        for url in annotations[:5]:
+            print(f"      - {url}")
+        return
+
     print(
-        "[warn] no web_search tool usage reported — the endpoint may have "
-        "silently ignored the tools parameter (model likely answered from memory)"
+        "[warn] no web_search evidence found — no tool usage or URL citations "
+        "reported; the endpoint likely ignored the tools parameter"
     )
 
 
