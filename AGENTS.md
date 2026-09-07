@@ -28,7 +28,6 @@ pip install -r requirements.txt
 - Check formatting: `ruff format --check scripts`
 - Lint: `ruff check scripts`
 - Validate imports: `python -m compileall scripts`
-- Build the website: `python3 scripts/build_site.py`
 
 ## Conventions
 
@@ -47,33 +46,46 @@ pip install -r requirements.txt
 
 ```
 mearsheimer/
-├── content/                    # Persian blog posts (episode-N.md)
-├── critique/                   # Fact-check critiques of the posts (episode-N.md)
-├── info/                       # Channel + episode metadata (URL, title, chapters)
-├── transcript/                 # Downloaded YouTube subtitles (episode-N.srt)
-├── processed/                  # Minified transcripts for model input (episode-N.md)
-├── prompts/                    # Reusable system prompts (post generation + critique)
-├── scripts/                    # Python tooling (process, create, check, build)
-├── requirements.txt            # Python dependencies
-├── docs/                       # Static site root (published via GitHub Pages)
-│   ├── index.html              # Homepage: episode-0 intro + episode links
-│   ├── episode-N.html          # One page per episode (N≥1)
-│   ├── assets/                 # Site assets; style.css is the shared stylesheet
-│   └── robots.txt              # Crawler rules
-├── .gitignore                  # Git ignore rules
-├── _config.yml                 # Jekyll/GitHub Pages site config
-├── .github/                    # GitHub related configs
-│   └── copilot-instructions.md # Points to AGENTS.md
-├── .agents/                    # Agent related files
-│   └── skills/                 # Agent skills
-│       └── site-styling/       # LLM skill: themes the generated site
-├── .env                        # Gitignored LLM endpoint config (see .env.example)
-├── .env.example                # Committed template for the gitignored .env
-├── AGENTS.md                   # Agent instructions (this file)
-├── CLAUDE.md                   # Points to AGENTS.md
-├── README.md                   # Project overview
-├── COPYRIGHT.md                # Copyright notice for extracted materials
-└── LICENSE                     # BSD 3-Clause license for the repo code
+├── content/                        # Persian blog posts (episode-N.md)
+├── critique/                       # Fact-check critiques of the posts (episode-N.md)
+├── info/                           # Channel + episode metadata (URL, title, chapters)
+├── transcript/                     # Downloaded YouTube subtitles (episode-N.srt)
+├── processed/                      # Minified transcripts for model input (episode-N.md)
+├── prompts/                        # Reusable system prompts (post generation + critique)
+│   ├── generate-post-0.md          # Chapter-free intro post prompt
+│   ├── generate-post-N.md          # Transcript-based post prompt (N≥1)
+│   ├── web-generate-posts.md       # Gemini prompt: intro video + episodes
+│   ├── web-generate-posts-N.md     # Gemini prompt: episodes only
+│   ├── research-critique.md        # Light critique prompt (content only)
+│   └── research-critique-full.md   # Full critique prompt (content + transcript)
+├── scripts/                        # Python tooling
+│   ├── process_transcripts.py      # SRT → processed/episode-N.md
+│   ├── create_content.py           # processed + prompt → content/episode-N.md
+│   ├── critique_content.py         # content (+transcript) → critique/episode-N.md
+│   ├── check_timestamps.py         # Validate chapter timestamps
+│   ├── strip_timestamps.py         # Strip mm:ss prefixes from section headings
+│   └── build_site.py               # Markdown → static site (docs/)
+├── requirements.txt                # Python dependencies
+├── docs/                           # Static site root (published via GitHub Pages)
+│   ├── index.html                  # Homepage: episode-0 intro + episode links
+│   ├── episode-N.html              # One page per episode (N≥1)
+│   ├── assets/                     # Site assets
+│   │   └── style.css               # Shared stylesheet (Vazirmatn, RTL)
+│   └── robots.txt                  # Crawler rules
+├── .gitignore                      # Git ignore rules
+├── _config.yml                     # Jekyll/GitHub Pages site config
+├── .github/                        # GitHub related configs
+│   └── copilot-instructions.md     # Points to AGENTS.md
+├── .agents/                        # Agent related files
+│   └── skills/                     # Agent skills
+│       └── site-styling/           # LLM skill: themes the generated site
+├── .env                            # Gitignored LLM endpoint config (see .env.example)
+├── .env.example                    # Committed template for the gitignored .env
+├── AGENTS.md                       # Agent instructions (this file)
+├── CLAUDE.md                       # Points to AGENTS.md
+├── README.md                       # Project overview
+├── COPYRIGHT.md                    # Copyright notice for extracted materials
+└── LICENSE                         # BSD 3-Clause license for the repo code
 ```
 
 ## Model Requirements for Post Generation
