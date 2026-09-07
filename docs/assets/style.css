@@ -205,6 +205,68 @@ a.episode-card:hover {
   font-weight: 600;
 }
 
+/* Critique links: icon jumps between an article and its critique page */
+a.critique-link {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-inline-start: 0.4rem;
+  padding: 0.2rem;
+  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  line-height: 0;
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+a.critique-link svg {
+  display: block;
+}
+
+a.critique-link:hover {
+  color: var(--accent-soft);
+  border-color: var(--accent);
+  background: rgba(139, 30, 45, 0.06);
+}
+
+article h1 a.critique-link {
+  padding: 0.25rem 0.35rem;
+  transform: translateY(-2px);
+}
+
+/* Episode cards keep their critique icon beside (to the left of) the card */
+ul.episode-list li.episode-card-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+ul.episode-list li.episode-card-item a.episode-card {
+  flex: 1;
+}
+
+ul.episode-list li.episode-card-item a.critique-link {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+}
+
+/* Critique page: lead-in note under the H1 */
+p.page-note {
+  padding: 0.75rem 1rem;
+  background: rgba(139, 30, 45, 0.06);
+  border-inline-start: 3px solid var(--accent);
+  border-radius: 6px;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+p.page-note a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* Video source link */
 p.video-source {
   margin-top: 2rem;
