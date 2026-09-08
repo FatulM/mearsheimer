@@ -26,6 +26,8 @@ For every chapter present in the Persian summary, compare its content against th
 
 The output must be entirely in Persian (Farsi). Use simple, natural language suitable for Iranian readers. Avoid unnecessarily difficult words and unnecessary English terms — the entire output must be in Persian with no untranslated English words or phrases. Use English digits (0-9) for the timestamps in chapter headings, but use Persian numerals (۰-۹) for any digits that appear in the Persian body text.
 
+The report must be self-sufficient: it must contain everything needed to correct the Persian summary without consulting the original English transcript again. Therefore, whenever you find a problem in a chapter, you must provide the full corrected Persian text of every affected paragraph (or list item), written so that it can be pasted directly into the Persian summary in place of the wrong text. Follow the Persian summary's existing formatting (paragraph breaks, bullet lists, bold markers) in your corrections, and keep any content that was already correct unchanged. Only produce replacement text for the paragraphs that contained errors; do not rewrite the whole chapter unless the errors warrant it. If a short phrase, number, or date is wrong, show the whole corrected sentence so the exact wording to use is unambiguous — do not rely on the reader having the transcript open.
+
 The output structure should be like this (but in Persian):
 
 ```markdown
@@ -37,10 +39,16 @@ The output structure should be like this (but in Persian):
 
 {What went wrong in this chapter: describe each specific problem — mistranslations, omissions, additions, numeric/date errors, or distortions — referring to the exact claim or wording affected}
 
+{Then, clearly labelled, the full corrected Persian text for every affected paragraph or list item, ready to paste into the Persian summary}
+
 ## {mm:ss} - {NEXT PROBLEMATIC CHAPTER, IF ANY}
+
+{Explanation and corrected Persian text for this chapter's problems}
 ```
 
 Include a chapter section **only** for chapters that had problems. Do not include sections for chapters that were rendered correctly. If every chapter was correct, do not add any chapter sections at all — the report is just the title and the general assessment.
+
+Make clear in the output which paragraphs were corrected and how, so a human can review each change. In the general assessment, summarise how many chapters had problems and how many of those problems required a full rewrite versus a simple fix. The corrected text is the most important part of the report: if a chapter had any error, do not finish that chapter's section until you have written the corrected Persian replacement for it.
 
 Do NOT add a H2 heading before the general assessment. Write the general assessment directly as plain text after the H1 title.
 
