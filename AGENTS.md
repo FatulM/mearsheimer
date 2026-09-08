@@ -46,49 +46,56 @@ pip install -r requirements.txt
 
 ```
 mearsheimer/
-├── content/                        # Persian blog posts (episode-N.md)
-├── critique/                       # Fact-check critiques of the posts (episode-N.md)
-├── info/                           # Channel + episode metadata (URL, title, chapters)
-├── transcript/                     # Downloaded YouTube subtitles (episode-N.srt)
-├── processed/                      # Minified transcripts for model input (episode-N.md)
-├── prompts/                        # Reusable system prompts (post generation + critique)
-│   ├── generate-post-0.md          # Chapter-free intro post prompt
-│   ├── generate-post-N.md          # Transcript-based post prompt (N≥1)
-│   ├── web-generate-posts.md       # Gemini prompt: intro video + episodes
-│   ├── web-generate-posts-N.md     # Gemini prompt: episodes only
-│   ├── research-critique.md        # Light critique prompt (content only)
-│   └── research-critique-full.md   # Full critique prompt (content + transcript)
-├── scripts/                        # Python tooling
-│   ├── process_transcripts.py      # SRT → processed/episode-N.md
-│   ├── create_content.py           # processed + prompt → content/episode-N.md
-│   ├── critique_content.py         # content (+transcript) → critique/episode-N.md
-│   ├── check_timestamps.py         # Validate chapter timestamps
-│   ├── check_critiques.py          # Validate critique structure vs content
-│   ├── check_web_tool.py           # Test whether the endpoint runs web search
-│   ├── strip_timestamps.py         # Strip mm:ss prefixes from section headings
-│   └── build_site.py               # Markdown → static site (docs/)
-├── requirements.txt                # Python dependencies
-├── docs/                           # Static site root (published via GitHub Pages)
-│   ├── index.html                  # Homepage: episode-0 intro + episode links
-│   ├── episode-N.html              # One page per episode (N≥1)
-│   ├── critique-episode-N.html     # One fact-check page per critiqued episode (N≥1)
-│   ├── assets/                     # Site assets
-│   │   └── style.css               # Shared stylesheet (Vazirmatn, RTL)
-│   └── robots.txt                  # Crawler rules
-├── .gitignore                      # Git ignore rules
-├── _config.yml                     # Jekyll/GitHub Pages site config
-├── .github/                        # GitHub related configs
-│   └── copilot-instructions.md     # Points to AGENTS.md
-├── .agents/                        # Agent related files
-│   └── skills/                     # Agent skills
-│       └── site-styling/           # LLM skill: themes the generated site
-├── .env                            # Gitignored LLM endpoint config (see .env.example)
-├── .env.example                    # Committed template for the gitignored .env
-├── AGENTS.md                       # Agent instructions (this file)
-├── CLAUDE.md                       # Points to AGENTS.md
-├── README.md                       # Project overview
-├── COPYRIGHT.md                    # Copyright notice for extracted materials
-└── LICENSE                         # BSD 3-Clause license for the repo code
+├── content/                            # Persian blog posts (episode-N.md)
+├── critique/                           # Fact-check critiques of the posts (episode-N.md)
+├── info/                               # Channel + episode metadata (URL, title, chapters)
+├── transcript/                         # Downloaded YouTube subtitles (episode-N.srt)
+├── processed/                          # Minified transcripts for model input (episode-N.md)
+├── prompts/                            # Reusable system prompts (post generation + critique)
+│   ├── generate-post-0.md              # Chapter-free intro post prompt
+│   ├── generate-post-N.md              # Transcript-based post prompt (N≥1)
+│   ├── web-generate-posts.md           # Gemini prompt: intro video + episodes
+│   ├── web-generate-posts-N.md         # Gemini prompt: episodes only
+│   ├── research-critique.md            # Light critique prompt (content only)
+│   ├── research-critique-full.md       # Full critique prompt (content + transcript)
+│   ├── research-critique-cite.md       # Light critique with [cite: N] citations
+│   ├── research-critique-full-cite.md  # Full critique with [cite: N] citations
+│   ├── check-translation.md            # Transcript↔post fidelity check prompt
+│   └── fix-translation.md              # Apply check-translation corrections to the post
+├── scripts/                            # Python tooling
+│   ├── process_transcripts.py          # SRT → processed/episode-N.md
+│   ├── create_content.py               # processed + prompt → content/episode-N.md
+│   ├── critique_content.py             # content (+transcript) → critique/episode-N.md
+│   ├── check_translation.py            # content + transcript → reports/episode-N.md
+│   ├── fix_translation.py              # content + report → fixed content/episode-N.md
+│   ├── check_timestamps.py             # Validate chapter timestamps
+│   ├── check_critiques.py              # Validate critique structure vs content
+│   ├── check_web_tool.py               # Test whether the endpoint runs web search
+│   ├── strip_timestamps.py             # Strip mm:ss prefixes from section headings
+│   └── build_site.py                   # Markdown → static site (docs/)
+├── reports/                            # Translation-check fidelity reports (episode-N.md)
+├── requirements.txt                    # Python dependencies
+├── docs/                               # Static site root (published via GitHub Pages)
+│   ├── index.html                      # Homepage: episode-0 intro + episode links
+│   ├── episode-N.html                  # One page per episode (N≥1)
+│   ├── critique-episode-N.html         # One fact-check page per critiqued episode (N≥1)
+│   ├── assets/                         # Site assets
+│   │   └── style.css                   # Shared stylesheet (Vazirmatn, RTL)
+│   └── robots.txt                      # Crawler rules
+├── .gitignore                          # Git ignore rules
+├── _config.yml                         # Jekyll/GitHub Pages site config
+├── .github/                            # GitHub related configs
+│   └── copilot-instructions.md         # Points to AGENTS.md
+├── .agents/                            # Agent related files
+│   └── skills/                         # Agent skills
+│       └── site-styling/               # LLM skill: themes the generated site
+├── .env                                # Gitignored LLM endpoint config (see .env.example)
+├── .env.example                        # Committed template for the gitignored .env
+├── AGENTS.md                           # Agent instructions (this file)
+├── CLAUDE.md                           # Points to AGENTS.md
+├── README.md                           # Project overview
+├── COPYRIGHT.md                        # Copyright notice for extracted materials
+└── LICENSE                             # BSD 3-Clause license for the repo code
 ```
 
 ## Model Requirements for Post Generation
@@ -96,6 +103,9 @@ mearsheimer/
 - `prompts/generate-post-0.md` and `prompts/generate-post-N.md` are used when the model is given the video details from `processed/episode-0.md` / `processed/episode-N.md` (the video title and the transcript text or chapters). These work with any model; no native YouTube access is required.
 - `prompts/web-generate-posts.md` and `prompts/web-generate-posts-N.md` are written for **Gemini** models, which have native access to YouTube videos (title, description, chapters, and transcripts) from just the video URL. The user provides the video link and the chapters copied from the video description. These prompts are used manually in a chat with the best model for this task as of today, **Gemini 3.1 Pro**; this is separate from the `LLM_MODEL` configured in `.env`, which `scripts/create_content.py` uses for the transcript-based pipeline.
 - `prompts/research-critique*.md` handle fact-checking the Persian posts. `prompts/research-critique.md` is the lighter prompt that takes only the `content/episode-N.md` file; `prompts/research-critique-full.md` additionally consumes the `processed/episode-N.md` English transcript for cross-referencing. These prompts ask the model to research authoritative English-language sources (peer-reviewed journals, think-tanks, international news, official reports) for each chapter, evaluate factual accuracy, analytical rigor, opposing viewpoints, and missing context, and output a per-chapter Persian critique. The model is instructed to keep the entire output in Persian, use Persian numerals, copy each chapter heading verbatim from the input (including its `{mm:ss}` timestamp), and never drop a chapter.
+- The `-cite` variants (`prompts/research-critique-cite.md` and `prompts/research-critique-full-cite.md`) add a citation system to the same critique task. The critique body carries inline `[cite: N]` markers next to verbatim copied chapter headings, and the output ends with a `---`-separated numbered citations list (English-digit numbers matching the inline markers). Requirements: every research-bearing chapter must carry at least one inline `[cite: N]`; a citations section with zero inline markers, or a listed entry that nothing cites, makes the output failed; entries are single-line `{N}. {Persian title} — {Original title / outlet} — {URL}` with no emphasis of any kind (no `*…*` italics, no `**…**` bold); only URLs actually retrieved during research may be listed. These variants are used manually with Gemini deep research or any model that returns `[cite: N]` markers; `critique_content.py` itself uses only the non-cite prompts.
+- `prompts/check-translation.md` checks whether the Persian post faithfully summarises and translates its source transcript. Input is the `processed/episode-N.md` transcript, a blank line, a lone `--` separator line, another blank line, and the `content/episode-N.md` post. It judges only from those two inputs (no web/search); for each problem chapter it copies the heading verbatim and provides a full corrected Persian replacement paragraph, plus a plain-text general assessment. Run it with `scripts/check_translation.py`.
+- `prompts/fix-translation.md` applies a check-translation report to a post, producing the corrected full post. Input is `content/episode-N.md`, a blank line, `---`, another blank line, and `reports/episode-N.md`. Only the flagged text is replaced with the report's corrections; everything else, including all chapter headings, is preserved verbatim; the output conforms to the `prompts/generate-post-N.md` structure. Run it with `scripts/fix_translation.py`.
 - When using a non-Gemini model (or any model without native YouTube access), the prompt must be slightly adapted: pass the downloaded `transcript/episode-N.srt` subtitles into the prompt alongside the video URL and chapters.
 
 ## Episodes
@@ -182,6 +192,12 @@ LLM_MODEL_CRITIQUE=gpt-5.6-terra
 python3 scripts/critique_content.py 3        # light critique (content only)
 python3 scripts/critique_content.py 3 --full # full critique (content + transcript)
 ```
+
+## Translation Check & Fix Pipeline
+
+`scripts/check_translation.py` verifies that the Persian blog post faithfully summarises and translates its source transcript. It reads `processed/episode-N.md` (the English transcript) and `content/episode-N.md` (the Persian post), sends both to the configured `LLM_MODEL` (not `LLM_MODEL_CRITIQUE`) with `prompts/check-translation.md` as the system prompt, and writes the resulting fidelity report to `reports/episode-N.md`. No web search is used; the model judges only from the two inputs. For each problem chapter the report copies the heading verbatim and provides a full corrected Persian replacement paragraph.
+
+`scripts/fix_translation.py` applies such a report to the post. It reads `content/episode-N.md` and `reports/episode-N.md`, sends both to `LLM_MODEL` with `prompts/fix-translation.md` as the system prompt, and rewrites `content/episode-N.md` with the corrected text. Only the flagged text is replaced with the report's corrections; everything else, including all chapter headings, is preserved verbatim. The original is first backed up to `content/episode-N.md.bak`.
 
 ## Website Build
 
