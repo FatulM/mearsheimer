@@ -109,7 +109,7 @@ LLM_MODEL_CRITIQUE=gpt-5.6-terra
 ### Translation Check & Fix Pipeline
 
 - `python3 scripts/check_translation.py N` — compares `processed/episode-N.md` against `content/episode-N.md` via `LLM_MODEL` (no web search) and writes a fidelity report (verbatim headings + full corrected Persian text per problem chapter) to `reports/episode-N.md`.
-- `python3 scripts/fix_translation.py N` — applies that report to the post, backing up the original to `content/episode-N.md.bak` and rewriting `content/episode-N.md`; only flagged text changes.
+- `python3 scripts/fix_translation.py N` — applies that report to the post, rewriting `content/episode-N.md`; only flagged text changes.
 
 ### Website Build
 

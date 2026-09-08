@@ -5,8 +5,7 @@ Apply the corrections from a translation-check report to a Persian blog post.
 Reads the current Persian post from content/episode-N.md and the translation-check
 report from reports/episode-N.md (N>=1), sends both to the configured LLM (using
 LLM_MODEL, not LLM_MODEL_CRITIQUE) with prompts/fix-translation.md as the system
-prompt, and rewrites content/episode-N.md with the corrected text. A backup of the
-original is saved to content/episode-N.md.bak before it is overwritten.
+prompt, and rewrites content/episode-N.md with the corrected text.
 
 No web search is used; the model applies only the corrections given in the report.
 
@@ -135,10 +134,8 @@ def main() -> None:
     corrected = normalize_content(corrected)
 
     content_path = CONTENT_DIR / f"episode-{args.episode}.md"
-    backup_path = content_path.with_suffix(".md.bak")
-    backup_path.write_text(content_path.read_text("utf-8"), "utf-8")
     content_path.write_text(corrected, "utf-8")
-    print(f"[ok] wrote {content_path} (backup: {backup_path.name})")
+    print(f"[ok] wrote {content_path}")
 
 
 if __name__ == "__main__":
