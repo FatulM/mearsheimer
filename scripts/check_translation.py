@@ -79,7 +79,7 @@ def check_endpoint(base_url: str, api_key: str) -> None:
         response = requests.get(
             f"{base_url}/models",
             headers={"Authorization": f"Bearer {api_key}"},
-            timeout=15,
+            timeout=300,
         )
         response.raise_for_status()
     except requests.RequestException as exc:
