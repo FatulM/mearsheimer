@@ -277,6 +277,18 @@ THEME_SCRIPT = """
 </script>
 """
 
+SUPPORT_NOTE_SECTION = (
+    '\n\n<section class="support-note">\n'
+    "<h2>حمایت مالی</h2>\n"
+    '<p class="support-call">صفحات نقد این وب‌سایت با مدل‌های ارزان‌تر هوش '
+    "مصنوعی تولید شده‌اند و ممکن است نادقیق یا ناقص باشند. استفاده از مدل‌های "
+    "قدرتمندتر کیفیت مطالب را چشم‌گیر بهبود می‌دهد؛ اگر می‌توانید از ما حمایت "
+    "مالی کنید یا به API مدل‌های پیشرفته دسترسی دارید، از طریق "
+    f'<a href="{GITHUB_URL}" rel="noopener noreferrer" target="_blank">'
+    "گیت‌هاب</a> با ما تماس بگیرید.</p>\n"
+    "</section>"
+)
+
 
 def page_template(
     *,
@@ -487,6 +499,7 @@ def main() -> int:
     body0 += (
         "\n\n"
         + video_source_paragraph(video0)
+        + SUPPORT_NOTE_SECTION
         + '\n\n<section id="episodes" class="episodes">\n'
         "<h2>قسمت‌های کانال</h2>\n"
         "<p>برای مطالعه تحلیل کامل هر قسمت، روی عنوان آن کلیک کنید:</p>\n"

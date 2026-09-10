@@ -219,6 +219,34 @@ section.episodes {
   padding-top: 1.5rem;
 }
 
+/* Financial support / content-quality note on the homepage */
+section.support-note {
+  margin: 2.5rem 0 0;
+  padding: 1.25rem 1.5rem;
+  background: var(--accent-tint);
+  border: 1px solid var(--border);
+  border-inline-start: 4px solid var(--accent);
+  border-radius: 10px;
+}
+
+section.support-note h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+}
+
+section.support-note p {
+  margin: 0 0 0.75rem;
+}
+
+section.support-note p.support-call {
+  margin-bottom: 0;
+}
+
+section.support-note a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 ul.episode-list {
   list-style: none;
   padding: 0;
