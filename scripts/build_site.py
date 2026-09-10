@@ -66,6 +66,26 @@ BACK_ICON_SVG = (
     "</svg>"
 )
 
+SUN_ICON_SVG = (
+    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" '
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+    'stroke-linejoin="round" aria-hidden="true">'
+    '<circle cx="12" cy="12" r="4.5"/>'
+    '<line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/>'
+    '<line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/>'
+    '<line x1="5.3" y1="5.3" x2="7.1" y2="7.1"/><line x1="16.9" y1="16.9" x2="18.7" y2="18.7"/>'
+    '<line x1="5.3" y1="18.7" x2="7.1" y2="16.9"/><line x1="16.9" y1="7.1" x2="18.7" y2="5.3"/>'
+    "</svg>"
+)
+
+MOON_ICON_SVG = (
+    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" '
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+    'stroke-linejoin="round" aria-hidden="true">'
+    '<path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z"/>'
+    "</svg>"
+)
+
 
 def inline(text: str) -> str:
     """Escape raw text then turn `**bold**` spans into <strong>."""
@@ -219,6 +239,45 @@ def video_source_paragraph(video_url: str) -> str:
     )
 
 
+THEME_TOGGLE = (
+    '<button type="button" class="theme-toggle" '
+    'aria-label="تغییر حالت روز/شب" title="تغییر حالت روز/شب">'
+    f"{SUN_ICON_SVG}{MOON_ICON_SVG}</button>"
+)
+
+THEME_SCRIPT = """
+<script>
+(function () {
+  var KEY = "mearsheimer-theme";
+  var body = document.body;
+  var btn = document.querySelector(".theme-toggle");
+  var sun = btn && btn.querySelector("svg:first-of-type");
+  var moon = btn && btn.querySelector("svg:last-of-type");
+
+  function apply(theme) {
+    body.classList.toggle("dark", theme === "dark");
+    body.classList.toggle("light", theme === "light");
+    if (sun) sun.style.display = theme === "dark" ? "none" : "block";
+    if (moon) moon.style.display = theme === "dark" ? "block" : "none";
+  }
+
+  function resolve() {
+    return localStorage.getItem(KEY) || "light";
+  }
+
+  apply(resolve());
+  if (btn) {
+    btn.addEventListener("click", function () {
+      var next = body.classList.contains("dark") ? "light" : "dark";
+      localStorage.setItem(KEY, next);
+      apply(next);
+    });
+  }
+})();
+</script>
+"""
+
+
 def page_template(
     *,
     title: str,
@@ -254,7 +313,7 @@ def page_template(
         f'<a class="github-ribbon" href="{GITHUB_URL}" '
         'rel="noopener noreferrer" target="_blank">برو به گیت‌هاب</a>\n'
         '<header class="site-header">\n'
-        f'  <nav class="site-nav">{nav_links}</nav>\n'
+        f'  <nav class="site-nav">{THEME_TOGGLE}{nav_links}</nav>\n'
         f'  <p class="site-subtitle">'
         f'<a href="{CHANNEL_URL}" rel="noopener noreferrer" target="_blank">'
         f"{SITE_SUBTITLE}</a></p>\n"
@@ -271,6 +330,7 @@ def page_template(
         "جان میرشایمر</a> اشاره می‌کند. محتوای این وب‌سایت با هوش مصنوعی "
         "تولید شده است و ممکن است خطا یا اشتباه داشته باشد.</p>"
         "</footer>\n"
+        f"{THEME_SCRIPT}\n"
         "</body>\n"
         "</html>\n"
     )
