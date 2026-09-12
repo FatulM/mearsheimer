@@ -11,7 +11,7 @@ def main():
         print("LLM_API_KEY not found in .env")
         return
 
-    url = "https://api.avalai.ir/user/v1/credit"
+    url = "https://api.avalai.org/user/v1/credit"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}",
