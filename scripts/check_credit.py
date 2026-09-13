@@ -6,9 +6,12 @@ from dotenv import load_dotenv
 
 def main():
     load_dotenv()
-    api_key = os.getenv("LLM_API_KEY")
+    api_key = os.getenv("LLM_API_KEY").strip()
     if not api_key:
         print("LLM_API_KEY not found in .env")
+        return
+    if not api_key.startswith("aa-"):
+        print("This script is only for AvalAI API keys (aa- prefix).")
         return
 
     url = "https://api.avalai.org/user/v1/credit"
