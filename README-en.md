@@ -2,6 +2,8 @@
 
 A static Persian (Farsi) website that publishes blog-style Persian summaries of the videos on [John Mearsheimer's YouTube channel](https://www.youtube.com/@JohnMearsheimer).
 
+[Blog Website](https://fatulm.github.io/mearsheimer/)
+
 ## Very important note about content quality and critiques
 
 Due to financial constraints and the high cost of advanced AI models (such as GPT-5.6), different parts of this project — especially the "reviews and critiques" pages — were produced with cheaper, more basic models. For this reason:
