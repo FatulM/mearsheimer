@@ -1,3 +1,5 @@
 # Copilot Instructions
 
-For agent instructions and guidelines, please refer to [AGENTS.md](../AGENTS.md).
+Before starting any conversation or task, you must read [AGENTS.md](../AGENTS.md) first and follow its instructions before proceeding.
+
+This file is only a pointer. The project requirements in [AGENTS.md](../AGENTS.md) are authoritative and must be consulted before any work begins.
