@@ -17,6 +17,7 @@ This is a static Persian (Farsi) website presenting blog-style Persian summaries
 
 ## Conventions
 
+- Never read `.env` file content directly; use `.env.example` file as the `.env` file template.
 - Never commit, stage, reset, or discard changes unless explicitly requested. Preserve unrelated user changes.
 - 120-char line length for .py files; Markdown has no line-length limit; Markdown headings followed by a blank line; all textual files end with a newline.
 - All website content is Persian (Farsi) for Iranian readers unless explicitly requested otherwise.
