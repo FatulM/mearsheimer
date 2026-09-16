@@ -1,4 +1,5 @@
 openai>=3.8,<4
+tiktoken>=0.9,<1
 python-dotenv>=1.2,<2
 requests>=2.34,<3
 
