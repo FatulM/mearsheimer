@@ -5,13 +5,16 @@ Generate the Persian blog post for an episode using an OpenAI-compatible LLM.
 Reads the minified transcript from processed/episode-N.md and the matching
 system prompt (prompts/generate-post-0.md for episode 0 or
 prompts/generate-post-N.md for episodes 1 and up), then calls the
-OpenAI-compatible endpoint configured in .env to produce the post and
-writes the result to content/episode-N.md.
+OpenAI-compatible endpoint configured in .env (using LLM_MODEL_CONTENT, falling
+back to LLM_MODEL) to produce the post and writes the result to
+content/episode-N.md.
 
-The endpoint is configured via .env:
+The endpoint is configured via .env; LLM_MODEL_CONTENT takes precedence and
+falls back to the base LLM_MODEL when unset:
     LLM_BASE_URL=https://api.avalai.org/v1
     LLM_API_KEY=<key>
-    LLM_MODEL=gemini-3.8-flash
+    LLM_MODEL_CONTENT=gemini-3.8-flash
+    LLM_MODEL=<model> (fallback)
 
 Usage:
     python3 scripts/create_content.py 3        # generate content/episode-3.md
@@ -33,16 +36,22 @@ PROCESSED_DIR = ROOT / "processed"
 PROMPTS_DIR = ROOT / "prompts"
 CONTENT_DIR = ROOT / "content"
 
-ENV_KEYS = ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL")
+ENV_KEYS = ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL_CONTENT")
 FENCE_RE = re.compile(r"^\s*```(?:\w*)\s*$", re.MULTILINE)
 
 
 def load_config() -> tuple[str, str, str]:
-    """Load and return (base_url, api_key, model) from .env."""
+    """Load and return (base_url, api_key, model) from .env.
+
+    LLM_MODEL_CONTENT takes precedence; the base LLM_MODEL is the fallback.
+    """
     load_dotenv(ENV_PATH)
     base_url = os.environ.get("LLM_BASE_URL", "").rstrip("/")
     api_key = os.environ.get("LLM_API_KEY", "").strip()
-    model = os.environ.get("LLM_MODEL", "").strip()
+    model = (
+        os.environ.get("LLM_MODEL_CONTENT", "").strip()
+        or os.environ.get("LLM_MODEL", "").strip()
+    )
     missing = [
         key for key, value in zip(ENV_KEYS, (base_url, api_key, model)) if not value
     ]

@@ -67,7 +67,8 @@ def main():
         rows.append(row)
 
     widths = [
-        max(len(header_names[i]), *(len(r[i]) for r in rows)) for i in range(len(header_names))
+        max(len(header_names[i]), *(len(r[i]) for r in rows))
+        for i in range(len(header_names))
     ]
 
     print("  ".join(h.ljust(w) for h, w in zip(header_names, widths)))

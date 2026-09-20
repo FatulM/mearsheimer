@@ -4,14 +4,17 @@ Fact-check and critique a Persian blog post for an episode using an OpenAI-compa
 
 Reads the Persian content from content/episode-N.md and the matching system
 prompt (prompts/research-critique.md by default, or prompts/research-critique-full.md
-with --full which also passes the English transcript from processed/episode-N.md),
-then calls the OpenAI-compatible endpoint configured in .env and writes the
-result to critique/episode-N.md.
+with --full, which also passes the English transcript from processed/episode-N.md),
+fact-checks each chapter via the web_search tool, and writes the result to
+critique/episode-N.md. It uses LLM_MODEL_CRITIQUE for the fact-checking, falling
+back to LLM_MODEL when unset.
 
-The endpoint is configured via .env:
+The endpoint is configured via .env; LLM_MODEL_CRITIQUE takes precedence and
+falls back to the base LLM_MODEL when unset:
     LLM_BASE_URL=https://api.avalai.org/v1
     LLM_API_KEY=<key>
     LLM_MODEL_CRITIQUE=<model>
+    LLM_MODEL=<model> (fallback)
 
 Usage:
     python3 scripts/critique_content.py 3        # light critique (content only)
@@ -40,11 +43,17 @@ FENCE_RE = re.compile(r"^\s*```(?:\w*)\s*$", re.MULTILINE)
 
 
 def load_config() -> tuple[str, str, str]:
-    """Load and return (base_url, api_key, model) from .env."""
+    """Load and return (base_url, api_key, model) from .env.
+
+    LLM_MODEL_CRITIQUE takes precedence; the base LLM_MODEL is the fallback.
+    """
     load_dotenv(ENV_PATH)
     base_url = os.environ.get("LLM_BASE_URL", "").rstrip("/")
     api_key = os.environ.get("LLM_API_KEY", "").strip()
-    model = os.environ.get("LLM_MODEL_CRITIQUE", "").strip()
+    model = (
+        os.environ.get("LLM_MODEL_CRITIQUE", "").strip()
+        or os.environ.get("LLM_MODEL", "").strip()
+    )
     missing = [
         key for key, value in zip(ENV_KEYS, (base_url, api_key, model)) if not value
     ]

@@ -4,15 +4,18 @@ Apply the corrections from a translation-check report to a Persian blog post.
 
 Reads the current Persian post from content/episode-N.md and the translation-check
 report from reports/episode-N.md (N>=1), sends both to the configured LLM (using
-LLM_MODEL, not LLM_MODEL_CRITIQUE) with prompts/fix-translation.md as the system
-prompt, and rewrites content/episode-N.md with the corrected text.
+LLM_MODEL_FIX, falling back to LLM_MODEL — never LLM_MODEL_CRITIQUE) with
+prompts/fix-translation.md as the system prompt, and rewrites content/episode-N.md
+with the corrected text.
 
 No web search is used; the model applies only the corrections given in the report.
 
-The endpoint is configured via .env:
+The endpoint is configured via .env; LLM_MODEL_FIX takes precedence and
+falls back to the base LLM_MODEL when unset:
     LLM_BASE_URL=https://api.avalai.org/v1
     LLM_API_KEY=<key>
-    LLM_MODEL=<model>
+    LLM_MODEL_FIX=<model>
+    LLM_MODEL=<model> (fallback)
 
 Usage:
     python3 scripts/fix_translation.py 1        # fix episode 1
@@ -33,16 +36,22 @@ CONTENT_DIR = ROOT / "content"
 REPORTS_DIR = ROOT / "reports"
 PROMPTS_DIR = ROOT / "prompts"
 
-ENV_KEYS = ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL")
+ENV_KEYS = ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL_FIX")
 SEPARATOR = "\n\n---\n\n"
 
 
 def load_config() -> tuple[str, str, str]:
-    """Load and return (base_url, api_key, model) from .env."""
+    """Load and return (base_url, api_key, model) from .env.
+
+    LLM_MODEL_FIX takes precedence; the base LLM_MODEL is the fallback.
+    """
     load_dotenv(ENV_PATH)
     base_url = os.environ.get("LLM_BASE_URL", "").rstrip("/")
     api_key = os.environ.get("LLM_API_KEY", "").strip()
-    model = os.environ.get("LLM_MODEL", "").strip()
+    model = (
+        os.environ.get("LLM_MODEL_FIX", "").strip()
+        or os.environ.get("LLM_MODEL", "").strip()
+    )
     missing = [
         key for key, value in zip(ENV_KEYS, (base_url, api_key, model)) if not value
     ]

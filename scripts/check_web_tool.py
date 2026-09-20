@@ -3,16 +3,18 @@
 Compare two model calls to check whether the endpoint actually runs web search.
 
 Calls the OpenAI-compatible endpoint configured in .env with the
-LLM_MODEL_CRITIQUE model, asking a question that requires up-to-date
-information (the current gold price). The first call passes the
-`web_search` hosted tool; the second does not. Both answers and the
-reported tool usage are printed so you can judge whether the endpoint
-really executes web searches or silently ignores the tools parameter.
+LLM_MODEL_CRITIQUE model (falling back to LLM_MODEL when unset), asking a
+question that requires up-to-date information (the current gold price). The
+first call passes the `web_search` hosted tool; the second does not. Both
+answers and the reported tool usage are printed so you can judge whether the
+endpoint really executes web searches or silently ignores the tools parameter.
 
-The endpoint is configured via .env:
+The endpoint is configured via .env; LLM_MODEL_CRITIQUE takes precedence and
+falls back to the base LLM_MODEL when unset:
     LLM_BASE_URL=https://api.avalai.org/v1
     LLM_API_KEY=<key>
     LLM_MODEL_CRITIQUE=<model>
+    LLM_MODEL=<model> (fallback)
 
 Usage:
     python3 scripts/check_web_tool.py
@@ -34,11 +36,17 @@ QUESTION = "Offer price per ounce of gold right now?"
 
 
 def load_config() -> tuple[str, str, str]:
-    """Load and return (base_url, api_key, model) from .env."""
+    """Load and return (base_url, api_key, model) from .env.
+
+    LLM_MODEL_CRITIQUE takes precedence; the base LLM_MODEL is the fallback.
+    """
     load_dotenv(ENV_PATH)
     base_url = os.environ.get("LLM_BASE_URL", "").rstrip("/")
     api_key = os.environ.get("LLM_API_KEY", "").strip()
-    model = os.environ.get("LLM_MODEL_CRITIQUE", "").strip()
+    model = (
+        os.environ.get("LLM_MODEL_CRITIQUE", "").strip()
+        or os.environ.get("LLM_MODEL", "").strip()
+    )
     missing = [
         key for key, value in zip(ENV_KEYS, (base_url, api_key, model)) if not value
     ]

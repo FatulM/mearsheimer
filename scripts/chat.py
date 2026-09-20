@@ -2,7 +2,8 @@
 """
 Interactive chat with the OpenAI-compatible LLM.
 
-Reads LLM_BASE_URL, LLM_API_KEY, and LLM_MODEL from .env.
+Reads LLM_BASE_URL, LLM_API_KEY, and LLM_MODEL_CHAT (falling back to the base
+LLM_MODEL when unset) from .env.
 Enter sends the message, Option+Enter inserts a newline.
 Type /exit or exit to quit.
 
@@ -78,14 +79,17 @@ def main() -> None:
 
     base_url = os.environ.get("LLM_BASE_URL", "").rstrip("/")
     api_key = os.environ.get("LLM_API_KEY", "").strip()
-    model = os.environ.get("LLM_MODEL", "").strip()
+    model = (
+        os.environ.get("LLM_MODEL_CHAT", "").strip()
+        or os.environ.get("LLM_MODEL", "").strip()
+    )
 
     missing = [
         key
         for key, value in (
             ("LLM_BASE_URL", base_url),
             ("LLM_API_KEY", api_key),
-            ("LLM_MODEL", model),
+            ("LLM_MODEL_CHAT / LLM_MODEL", model),
         )
         if not value
     ]

@@ -1,24 +1,30 @@
 #!/usr/bin/env python3
 """
-Check that a Persian blog post summarises and translates its source transcript correctly.
+Simplify the language of a Persian fact-check critique in plain Persian (Farsi).
 
-Reads the minified English transcript from processed/episode-N.md and the Persian
-summary from content/episode-N.md (N>=1), sends both to the configured LLM (using
-LLM_MODEL_REPORT, falling back to LLM_MODEL — never LLM_MODEL_CRITIQUE) with
-prompts/check-translation.md as the system prompt, and writes the resulting
-Persian fidelity report to reports/episode-N.md.
+This is a post-generation refinement pass: reads the current critique from
+critique/episode-N.md (N>=1), sends it with prompts/simplify-critique.md as the
+system prompt to the configured LLM (using LLM_MODEL_SIMPLIFY, falling back to
+LLM_MODEL — never LLM_MODEL_CRITIQUE), and rewrites critique/episode-N.md with
+the simplified text.
 
-No web search is used for this check; the model judges only from the two inputs.
+The pass is language simplification, not summarization: the critique keeps its
+structure (H1 title, the overall assessment, and every chapter heading
+byte-identical, with the same timestamps and titles) and all of its content —
+including every judgement and verdict; only the wording is made simpler and
+more natural for Iranian readers.
 
-The endpoint is configured via .env; LLM_MODEL_REPORT takes precedence and
+No web search is used; the model rewrites only the text it is given.
+
+The endpoint is configured via .env; LLM_MODEL_SIMPLIFY takes precedence and
 falls back to the base LLM_MODEL when unset:
     LLM_BASE_URL=https://api.avalai.org/v1
     LLM_API_KEY=<key>
-    LLM_MODEL_REPORT=<model>
+    LLM_MODEL_SIMPLIFY=<model>
     LLM_MODEL=<model> (fallback)
 
 Usage:
-    python3 scripts/check_translation.py 1        # check episode 1
+    python3 scripts/simplify_critique.py 1        # simplify critique for episode 1
 """
 
 import argparse
@@ -32,25 +38,22 @@ from openai import OpenAI
 
 ROOT = Path(__file__).resolve().parent.parent
 ENV_PATH = ROOT / ".env"
-PROCESSED_DIR = ROOT / "processed"
-CONTENT_DIR = ROOT / "content"
+CRITIQUE_DIR = ROOT / "critique"
 PROMPTS_DIR = ROOT / "prompts"
-REPORTS_DIR = ROOT / "reports"
 
-ENV_KEYS = ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL_REPORT")
-SEPARATOR = "\n\n--\n\n"
+ENV_KEYS = ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL_SIMPLIFY")
 
 
 def load_config() -> tuple[str, str, str]:
     """Load and return (base_url, api_key, model) from .env.
 
-    LLM_MODEL_REPORT takes precedence; the base LLM_MODEL is the fallback.
+    LLM_MODEL_SIMPLIFY takes precedence; the base LLM_MODEL is the fallback.
     """
     load_dotenv(ENV_PATH)
     base_url = os.environ.get("LLM_BASE_URL", "").rstrip("/")
     api_key = os.environ.get("LLM_API_KEY", "").strip()
     model = (
-        os.environ.get("LLM_MODEL_REPORT", "").strip()
+        os.environ.get("LLM_MODEL_SIMPLIFY", "").strip()
         or os.environ.get("LLM_MODEL", "").strip()
     )
     missing = [
@@ -64,22 +67,16 @@ def load_config() -> tuple[str, str, str]:
 
 
 def read_inputs(n: int) -> tuple[str, str]:
-    """Read and return (system_prompt, user_content) for episode N."""
-    processed_path = PROCESSED_DIR / f"episode-{n}.md"
-    content_path = CONTENT_DIR / f"episode-{n}.md"
-    prompt_path = PROMPTS_DIR / "check-translation.md"
-    missing = [p for p in (processed_path, content_path, prompt_path) if not p.exists()]
+    """Read and return (system_prompt, critique) for episode N."""
+    critique_path = CRITIQUE_DIR / f"episode-{n}.md"
+    prompt_path = PROMPTS_DIR / "simplify-critique.md"
+    missing = [p for p in (critique_path, prompt_path) if not p.exists()]
     if missing:
         sys.exit(
             "[error] missing input file(s): "
             + ", ".join(str(p.relative_to(ROOT)) for p in missing)
         )
-
-    system_prompt = prompt_path.read_text("utf-8")
-    transcript = processed_path.read_text("utf-8")
-    content = content_path.read_text("utf-8")
-    user_content = SEPARATOR.join((transcript, content))
-    return system_prompt, user_content
+    return prompt_path.read_text("utf-8"), critique_path.read_text("utf-8")
 
 
 def check_endpoint(base_url: str, api_key: str) -> None:
@@ -98,7 +95,7 @@ def check_endpoint(base_url: str, api_key: str) -> None:
 def generate(
     base_url: str, api_key: str, model: str, system_prompt: str, user_content: str
 ) -> str:
-    """Call the OpenAI-compatible endpoint and return the report."""
+    """Call the OpenAI-compatible endpoint and return the simplified critique."""
     print(f"[ok] calling model '{model}' at {base_url} ...")
     client = OpenAI(base_url=base_url, api_key=api_key)
     response = client.chat.completions.create(
@@ -129,23 +126,23 @@ def normalize_content(content: str) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Check that a Persian post summarises its source transcript correctly."
+        description="Simplify the Persian wording of a critique post."
     )
-    parser.add_argument("episode", type=int, help="episode number to check (>= 1)")
+    parser.add_argument("episode", type=int, help="episode number to simplify (>= 1)")
     args = parser.parse_args()
 
     if args.episode < 1:
         sys.exit("[error] episode number must be >= 1")
 
     base_url, api_key, model = load_config()
-    system_prompt, user_content = read_inputs(args.episode)
+    system_prompt, critique = read_inputs(args.episode)
     check_endpoint(base_url, api_key)
-    content = generate(base_url, api_key, model, system_prompt, user_content)
+    simplified = generate(base_url, api_key, model, system_prompt, critique)
+    simplified = normalize_content(simplified)
 
-    REPORTS_DIR.mkdir(exist_ok=True)
-    out_path = REPORTS_DIR / f"episode-{args.episode}.md"
-    out_path.write_text(normalize_content(content), "utf-8")
-    print(f"[ok] wrote {out_path}")
+    critique_path = CRITIQUE_DIR / f"episode-{args.episode}.md"
+    critique_path.write_text(simplified, "utf-8")
+    print(f"[ok] wrote {critique_path}")
 
 
 if __name__ == "__main__":

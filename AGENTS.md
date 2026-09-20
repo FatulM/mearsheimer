@@ -82,17 +82,31 @@ Rename the resulting `.srt` file to `transcript/episode-N.srt` for episode N.
 ```
 LLM_BASE_URL=https://api.avalai.org/v1
 LLM_API_KEY=aa-FILL_ME_IN
-LLM_MODEL=gemini-3.8-flash
+LLM_MODEL=deepseek-v4.1-flash
+LLM_MODEL_CONTENT=gemini-3.8-flash
+LLM_MODEL_REPORT=gemini-3.5-flash-lite
+LLM_MODEL_FIX=deepseek-v4.1-flash
+LLM_MODEL_SIMPLIFY=gemini-3.5-flash-lite
 LLM_MODEL_CRITIQUE=gpt-5.6-terra
+LLM_MODEL_CHAT=deepseek-v4.1-flash
 ```
 
-`create_content.py` and the check/fix-translation scripts use `LLM_MODEL`; `critique_content.py` uses `LLM_MODEL_CRITIQUE`.
+Every script prefers a role-specific variable and falls back to the base `LLM_MODEL` when that variable is unset (failing only if both are missing):
+
+- `LLM_MODEL_CHAT` — interactive chat (`chat.py`)
+- `LLM_MODEL_CONTENT` — content creation / summarization (`create_content.py`)
+- `LLM_MODEL_REPORT` — check/report scripts (`check_translation.py`)
+- `LLM_MODEL_FIX` — fix scripts (`fix_translation.py`)
+- `LLM_MODEL_SIMPLIFY` — simplification scripts (`simplify_language.py`, `simplify_critique.py`)
+- `LLM_MODEL_CRITIQUE` — fact-checking with the `web_search` tool (`critique_content.py`, `check_web_tool.py`)
 
 ## Prompts (`prompts/`)
 
 - **Post generation** — `generate-post-0.md` (chapter-free intro) and `generate-post-N.md` (transcript-based, N≥1) work with any model; no native YouTube access. `web-generate-posts*.md` are for **Gemini** models (native YouTube access), used manually with **Gemini 3.1 Pro**. For non-Gemini models, pass `transcript/episode-N.srt` alongside the video URL and chapters.
 - **Critique** — `research-critique.md` (content only) and `research-critique-full.md` (+ transcript) fact-check each chapter against authoritative English sources, keeping every chapter heading verbatim (timestamp + title) and never dropping one. The `-cite` variants (`research-critique-cite.md`, `research-critique-full-cite.md`) add inline `[cite: N]` markers and a numbered URL list; full rules are in the prompts. `critique_content.py` uses only the non-cite prompts.
 - **Translation** — `check-translation.md` (input: transcript, blank line, `--`, blank line, post) reports per-problem-chapter headings with corrected Persian text; `fix-translation.md` (input: post, blank line, `---`, blank line, report) applies those corrections, outputting a full post conforming to `generate-post-N.md`'s structure.
+- **Simplification** — `simplify-language.md` (input: a Persian post) rewrites it in plainer Persian for Iranian readers. It is a language-simplification pass, not a summary: the structure (H1 title and every chapter heading verbatim) and all content are preserved; only the wording is simplified.
+- **Critique simplification** — `simplify-critique.md` (input: a Persian critique) rewrites it in plainer Persian the same way: the structure (H1 title, overall assessment, and every chapter heading byte-identical) and all content — including every judgement and verdict — are preserved; only the wording is simplified.
 
 ## Pipelines
 
@@ -105,12 +119,17 @@ LLM_MODEL_CRITIQUE=gpt-5.6-terra
 
 ### Critique Pipeline
 
-`python3 scripts/critique_content.py N [--full]` fact-checks the post and writes `critique/episode-N.md`. It calls the endpoint with `LLM_MODEL_CRITIQUE` plus a `web_search` tool; `--full` additionally passes the transcript from `processed/episode-N.md` for cross-referencing.
+`python3 scripts/critique_content.py N [--full]` fact-checks the post and writes `critique/episode-N.md`. It calls the endpoint with `LLM_MODEL_CRITIQUE` (base `LLM_MODEL` fallback) plus a `web_search` tool; `--full` additionally passes the transcript from `processed/episode-N.md` for cross-referencing.
 
 ### Translation Check & Fix Pipeline
 
-- `python3 scripts/check_translation.py N` — compares `processed/episode-N.md` against `content/episode-N.md` via `LLM_MODEL` (no web search) and writes a fidelity report (verbatim headings + full corrected Persian text per problem chapter) to `reports/episode-N.md`.
-- `python3 scripts/fix_translation.py N` — applies that report to the post, rewriting `content/episode-N.md`; only flagged text changes.
+- `python3 scripts/check_translation.py N` — compares `processed/episode-N.md` against `content/episode-N.md` via `LLM_MODEL_REPORT` (no web search) and writes a fidelity report (verbatim headings + full corrected Persian text per problem chapter) to `reports/episode-N.md`.
+- `python3 scripts/fix_translation.py N` — applies that report to the post via `LLM_MODEL_FIX`, rewriting `content/episode-N.md`; only flagged text changes.
+
+### Language Simplification Pipeline
+
+- `python3 scripts/simplify_language.py N` — a second, post-fix iteration on the content: rewrites `content/episode-N.md` in plainer Persian via `prompts/simplify-language.md` and `LLM_MODEL_SIMPLIFY` (no web search). It is a language-simplification pass, not a summary — the H1 title and every chapter heading are kept verbatim and all content is preserved; only the wording is simplified. Overwrites `content/episode-N.md`.
+- `python3 scripts/simplify_critique.py N` — the same pass for the critique: rewrites `critique/episode-N.md` in plainer Persian via `prompts/simplify-critique.md` and `LLM_MODEL_SIMPLIFY` (no web search). The structure (H1 title, overall assessment, and every chapter heading byte-identical — heading parity with the article is preserved) and all content, including every judgement and verdict, are kept; only the wording is simplified. Overwrites `critique/episode-N.md`.
 
 ### Website Build
 
