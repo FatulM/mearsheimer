@@ -98,12 +98,12 @@ Every script prefers a role-specific variable and falls back to the base `LLM_MO
 - `LLM_MODEL_REPORT` — check/report scripts (`check_translation.py`)
 - `LLM_MODEL_FIX` — fix scripts (`fix_translation.py`)
 - `LLM_MODEL_SIMPLIFY` — simplification scripts (`simplify_language.py`, `simplify_critique.py`)
-- `LLM_MODEL_CRITIQUE` — fact-checking with the `web_search` tool (`critique_content.py`, `check_web_tool.py`)
+- `LLM_MODEL_CRITIQUE` — fact-checking with the `web_search` tool (`critique_content.py`, `critique_content_cited.py`, `check_web_tool.py`)
 
 ## Prompts (`prompts/`)
 
 - **Post generation** — `generate-post-0.md` (chapter-free intro) and `generate-post-N.md` (transcript-based, N≥1) work with any model; no native YouTube access. `web-generate-posts*.md` are for **Gemini** models (native YouTube access), used manually with **Gemini 3.1 Pro**. For non-Gemini models, pass `transcript/episode-N.srt` alongside the video URL and chapters.
-- **Critique** — `research-critique.md` (content only) and `research-critique-full.md` (+ transcript) fact-check each chapter against authoritative English sources, keeping every chapter heading verbatim (timestamp + title) and never dropping one. The `-cite` variants (`research-critique-cite.md`, `research-critique-full-cite.md`) add inline `[cite: N]` markers and a numbered URL list; full rules are in the prompts. `critique_content.py` uses only the non-cite prompts.
+- **Critique** — `research-critique.md` (content only) and `research-critique-full.md` (+ transcript) fact-check each chapter against authoritative English sources, keeping every chapter heading verbatim (timestamp + title) and never dropping one. The `-cite` variants (`research-critique-cite.md`, `research-critique-full-cite.md`) add inline `[cite: N]` markers and a numbered URL list; full rules are in the prompts. `critique_content.py` uses only the non-cite prompts; `critique_content_cited.py` uses only the `-cite` prompts (writes `critique/episode-N-cite.md`).
 - **Translation** — `check-translation.md` (input: transcript, blank line, `--`, blank line, post) reports per-problem-chapter headings with corrected Persian text; `fix-translation.md` (input: post, blank line, `---`, blank line, report) applies those corrections, outputting a full post conforming to `generate-post-N.md`'s structure.
 - **Simplification** — `simplify-language.md` (input: a Persian post) rewrites it in plainer Persian for Iranian readers. It is a language-simplification pass, not a summary: the structure (H1 title and every chapter heading verbatim) and all content are preserved; only the wording is simplified.
 - **Critique simplification** — `simplify-critique.md` (input: a Persian critique) rewrites it in plainer Persian the same way: the structure (H1 title, overall assessment, and every chapter heading byte-identical) and all content — including every judgement and verdict — are preserved; only the wording is simplified.
@@ -120,6 +120,8 @@ Every script prefers a role-specific variable and falls back to the base `LLM_MO
 ### Critique Pipeline
 
 `python3 scripts/critique_content.py N [--full]` fact-checks the post and writes `critique/episode-N.md`. It calls the endpoint with `LLM_MODEL_CRITIQUE` (base `LLM_MODEL` fallback) plus a `web_search` tool; `--full` additionally passes the transcript from `processed/episode-N.md` for cross-referencing.
+
+`python3 scripts/critique_content_cited.py N [--full]` is the same fact-check but with the `-cite` prompts, adding inline `[cite: N]` markers and a numbered URL list; it writes `critique/episode-N-cite.md` instead.
 
 ### Translation Check & Fix Pipeline
 

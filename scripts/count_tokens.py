@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Count the number of OpenAI-style tokens in a UTF-8 text file.
 
