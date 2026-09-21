@@ -18,8 +18,8 @@ falls back to the base LLM_MODEL when unset:
     LLM_MODEL=<model> (fallback)
 
 Usage:
-    python3 scripts/critique_content_cited.py 3        # cited critique (content only)
-    python3 scripts/critique_content_cited.py 3 --full # cited critique (content + transcript)
+    python3 scripts/critique_content_cite.py 3        # cited critique (content only)
+    python3 scripts/critique_content_cite.py 3 --full # cited critique (content + transcript)
 """
 
 import argparse
