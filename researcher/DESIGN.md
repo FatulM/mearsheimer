@@ -68,7 +68,7 @@ Two jobs in one loop:
 1. **Fact-check the critique** against the transcript and fresh web research: verify claims, catch misattributions, fix incorrect Persian text, drop unsupported assertions.
 2. **Repair the document** until the deterministic gates pass (see below).
 
-The reviewer is the only agent allowed to rewrite body text after the draft. Each iteration returns the full corrected document plus a changelog.
+The reviewer is the only agent allowed to rewrite body text after the draft. Each iteration returns the full corrected document (no commentary), which the deterministic gates then re-check.
 
 ### [6] Deterministic gates (`researcher/validate.py`)
 
@@ -78,7 +78,7 @@ Pure-Python checks, no LLM, mirroring and extending `scripts/check_critiques.py`
 - `## {mm:ss} - {TITLE}` headings count, order, and text byte-identical to `content/episode-N.md`;
 - blank line after every heading; no stray horizontal rules; exactly one `---` immediately before the citations list; file ends with a blank line;
 - every `[cite: N]` maps to an entry; every entry is referenced; numbering is sequential in first-reference order;
-- every cited URL (and every entry) exists in the source registry (provenance), and passes an HTTP liveness check;
+- every cited URL (and every entry) exists in the source registry (provenance), and is not known dead (network failures and bot-block responses are treated as unknown, not dead, so real sources behind bot walls are not rejected);
 - body contains only `[cite: N]` brackets (no `[47†L25-L32]`-style artifacts), timestamps use ASCII digits, body uses Persian numerals otherwise.
 
 Gates run deterministically after every reviewer iteration. The result is written only when all gates pass. If the reviewer cannot reach a passing state within `RESEARCHER_MAX_REVIEW_ROUNDS`, the run exits non-zero and writes the last draft to `files/result/episode-N.failed.md` (never a false "success").
@@ -89,7 +89,7 @@ Gates run deterministically after every reviewer iteration. The result is writte
 |---|---|---|
 | `web_search(query, max_results)` | `ddgs` | `[{title, url, snippet}]` |
 | `fetch_url(url)` | `requests` + `trafilatura`/`BeautifulSoup`/`lxml` for HTML, `pypdf` for PDF | cleaned `{url, title, text}` (truncated) |
-| `url_alive(url)` | `requests` HEAD/GET | `{url, status, ok}` |
+| `url_alive(url)` | `requests` GET | `{url, status, ok}` (ok `null` = unknown) |
 | `read_transcript(chapter_or_query)` | `processed/episode-N.md` | matching chapter text |
 | `note_write(topic_id, content)` | run scratchpad | path + ack |
 | `validate(markdown)` | `validate.py` | structured problem list |
@@ -130,6 +130,7 @@ researcher/
 ├── sources.py           # source registry + provenance
 ├── validate.py          # deterministic gates
 ├── config.py            # .env loading, model role resolution, limits
+├── trace.py             # run trace log + token usage
 ├── prompts/
 │   ├── planner.md
 │   ├── researcher.md

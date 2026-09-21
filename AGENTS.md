@@ -37,6 +37,7 @@ mearsheimer/
 ├── processed/                          # Minified transcripts for model input (episode-N.md)
 ├── prompts/                            # Reusable system prompts (see "Prompts")
 ├── scripts/                            # Python tooling (see "Pipelines")
+├── researcher/                         # Agentic critique app (see "Researcher Agent")
 ├── reports/                            # Translation-check fidelity reports (episode-N.md)
 ├── requirements.txt                    # Python dependencies
 ├── docs/                               # Static site root (published via GitHub Pages)
@@ -89,6 +90,10 @@ LLM_MODEL_FIX=deepseek-v4.1-flash
 LLM_MODEL_SIMPLIFY=gemini-3.5-flash-lite
 LLM_MODEL_CRITIQUE=gpt-5.6-terra
 LLM_MODEL_CHAT=deepseek-v4.1-flash
+LLM_MODEL_AGENT_PLANNER=deepseek-v4.1-flash
+LLM_MODEL_AGENT_LEAD=deepseek-v4.1-flash
+LLM_MODEL_AGENT_RESEARCH=deepseek-v4.1-flash
+LLM_MODEL_AGENT_REVIEWER=deepseek-v4.1-flash
 ```
 
 Every script prefers a role-specific variable and falls back to the base `LLM_MODEL` when that variable is unset (failing only if both are missing):
@@ -99,6 +104,7 @@ Every script prefers a role-specific variable and falls back to the base `LLM_MO
 - `LLM_MODEL_FIX` — fix scripts (`fix_translation.py`)
 - `LLM_MODEL_SIMPLIFY` — simplification scripts (`simplify_language.py`, `simplify_critique.py`)
 - `LLM_MODEL_CRITIQUE` — fact-checking with the `web_search` tool (`critique_content.py`, `critique_content_cited.py`, `check_web_tool.py`)
+- `LLM_MODEL_AGENT_PLANNER`, `LLM_MODEL_AGENT_LEAD`, `LLM_MODEL_AGENT_RESEARCH`, `LLM_MODEL_AGENT_REVIEWER` — the agentic critique app (`researcher/`); see "Researcher Agent"
 
 ## Prompts (`prompts/`)
 
@@ -122,6 +128,12 @@ Every script prefers a role-specific variable and falls back to the base `LLM_MO
 `python3 scripts/critique_content.py N [--full]` fact-checks the post and writes `critique/episode-N.md`. It calls the endpoint with `LLM_MODEL_CRITIQUE` (base `LLM_MODEL` fallback) plus a `web_search` tool; `--full` additionally passes the transcript from `processed/episode-N.md` for cross-referencing.
 
 `python3 scripts/critique_content_cited.py N [--full]` is the same fact-check but with the `-cite` prompts, adding inline `[cite: N]` markers and a numbered URL list; it writes `critique/episode-N-cite.md` instead.
+
+### Researcher Agent
+
+`python3 researcher/main.py N [--verbose] [--max-topics K] [--max-tool-calls K] [--max-review-rounds K] [--out PATH] [--resume RUN_ID]` is an agentic replacement for the critique scripts. It reads `content/episode-N.md` and `processed/episode-N.md`, plans research topics (`LLM_MODEL_AGENT_PLANNER`), runs one research subagent per topic in parallel with real client-side tools (`web_search` via `ddgs`, `fetch_url` for HTML/PDF, `url_alive`, `read_transcript`, `note_write`) using `LLM_MODEL_AGENT_RESEARCH`, writes the cited critique with `LLM_MODEL_AGENT_LEAD`, then a reviewer/fixer (`LLM_MODEL_AGENT_REVIEWER`) fact-checks and repairs it until the deterministic gates in `researcher/validate.py` pass (heading parity, citation self-consistency, URL provenance and liveness).
+
+Output goes to `researcher/files/result/episode-N.md`; per-run artifacts (trace, plan, notes, draft, reviewer passes, sources) go under `researcher/files/runs/<timestamp>-episode-N/` (gitignored). If the gates cannot be satisfied, it exits non-zero and writes `episode-N.failed.md` instead. See `researcher/DESIGN.md` and `researcher/README.md`.
 
 ### Translation Check & Fix Pipeline
 
