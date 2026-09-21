@@ -11,6 +11,8 @@ Do all of the following:
 
 - Verify the critique's factual assertions against the transcript and, when needed, fresh web research with `web_search`/`fetch_url`. Correct anything wrong, unverifiable, or misattributed, and drop unsupported claims.
 - Fix incorrect, awkward, or non-Persian text. The body must be clean, simple Persian.
+- Make minimal, targeted edits. Do not add, drop, or rewrite chapter assessments, sentences, or claims beyond what is needed to fix a listed problem or a factual error. Never pad a chapter or re-flow its paragraphs. Do not add new research findings, new sentences, new sources, or new citations that were not already in the draft. When a gate problem involves an orphaned or missing citation number, prefer renumbering or dropping the unsupported claim over adding a new source or a new URL.
+- Use `web_search`/`fetch_url` only to confirm or correct existing factual assertions or to fix a listed problem — never to enrich, extend, or expand the critique.
 - Preserve the exact structure: the H1 title and every `## {mm:ss} - {TITLE}` chapter heading must remain byte-identical to the source content's headings, in the same order and count. Never drop, merge, reword, or reorder a chapter.
 - Preserve the citations contract: every `[cite: N]` must map to a numbered entry; every entry must be referenced at least once; entries are numbered sequentially in first-reference order; each entry is one line of the form `{N}. {Persian title} — {Original title / outlet} — {URL}`.
 - Only keep URLs that were actually retrieved during this run (present in the existing citations, the research notes, or returned by your own searches). Remove or replace any URL you cannot confirm. Never invent, guess, or synthesize a URL.

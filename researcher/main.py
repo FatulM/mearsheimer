@@ -44,7 +44,7 @@ from tools import (
     Toolbox,
     TranscriptIndex,
 )
-from validate import cited_urls, extract_headings, validate_critique
+from validate import cited_urls, extract_headings, repair_mechanical, validate_critique
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -325,7 +325,21 @@ def run_reviewer(
 def check_liveness(toolbox: Toolbox, text: str) -> None:
     """Run an HTTP liveness check on every cited URL, recording results."""
     for url in cited_urls(text):
-        toolbox.url_alive(url)
+        toolbox.trace.log(
+            "tool_call",
+            agent=toolbox.agent,
+            message="url_alive",
+            arguments={"url": url},
+        )
+        result = toolbox.url_alive(url)
+        toolbox.trace.log(
+            "tool_result",
+            agent=toolbox.agent,
+            message="url_alive",
+            chars=len(str(result)),
+            ok=result.get("ok"),
+            status=result.get("status"),
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -385,13 +399,13 @@ def main(argv: list[str] | None = None) -> int:
 
     current = draft
     for attempt in range(settings.max_review_rounds + 1):
+        current = repair_mechanical(current)
         problems = validate_critique(current, content_text, registry)
         trace.log(
             "gates",
             message=f"round {attempt}: {len(problems)} problem(s)",
             problems=[str(p) for p in problems],
         )
-        (run_dir / f"review-{attempt}.md").write_text(current, "utf-8")
         if not problems:
             print(f"[ok] gates passed on round {attempt}")
             break
@@ -412,6 +426,7 @@ def main(argv: list[str] | None = None) -> int:
             notes,
             problems,
         )
+        (run_dir / f"review-{attempt + 1}.md").write_text(current, "utf-8")
 
     check_liveness(writer_toolbox, current)
     registry.save(run_dir / "sources.json")

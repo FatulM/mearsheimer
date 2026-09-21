@@ -274,6 +274,84 @@ def validate_critique(
     return problems
 
 
+def _ensure_heading_blank_lines(text: str) -> str:
+    """Insert a blank line after every heading that lacks one."""
+    lines = text.split("\n")
+    out: list[str] = []
+    for i, line in enumerate(lines):
+        out.append(line)
+        if HEADING_RE.match(line) and i + 1 < len(lines) and lines[i + 1].strip():
+            out.append("")
+    return "\n".join(out)
+
+
+def _renumber_citations(text: str) -> str:
+    """Renumber citation entries and inline markers to first-reference order.
+
+    Applied only when the transformation is bijective (every cited number maps
+    to exactly one entry and every entry is cited), because then it is safe to
+    compute mechanically. Otherwise the original text is returned unchanged and
+    the reviewer must handle it.
+    """
+    lines = text.split("\n")
+    rules = [i for i, line in enumerate(lines) if HORIZONTAL_RULE_RE.match(line)]
+    if len(rules) != 1:
+        return text
+    rule = rules[0]
+    entries = lines[rule + 1 :]
+
+    entry_nums: list[int] = []
+    for line in entries:
+        if not line.strip():
+            continue
+        match = ENTRY_RE.match(line)
+        if not match:
+            return text
+        entry_nums.append(int(match.group(1)))
+
+    body_text = "\n".join(lines[:rule])
+    referenced: list[int] = []
+    for match in CITE_MARKER_RE.finditer(body_text):
+        referenced.extend(int(part.strip()) for part in match.group(1).split(","))
+
+    if not referenced or sorted(set(referenced)) != sorted(set(entry_nums)):
+        return text
+
+    ordered = dict.fromkeys(referenced)
+    mapping = {old: i + 1 for i, old in enumerate(ordered)}
+    if all(mapping[n] == n for n in entry_nums):
+        return text
+
+    def _remap(match: re.Match) -> str:
+        nums = ",".join(
+            str(mapping[int(part.strip())]) for part in match.group(1).split(",")
+        )
+        return f"[cite: {nums}]"
+
+    new_body = CITE_MARKER_RE.sub(_remap, body_text)
+
+    new_entries: list[str] = []
+    for line in entries:
+        match = ENTRY_RE.match(line)
+        if match:
+            line = f"{mapping[int(match.group(1))]}{line[match.end(1) :]}"
+        new_entries.append(line)
+    return "\n".join([new_body, "---", *new_entries])
+
+
+def repair_mechanical(text: str) -> str:
+    """Apply safe, deterministic repairs without an LLM.
+
+    Fixes heading blank lines, citation numbering in first-reference order
+    (when bijective), and the trailing newline/blank line. Idempotent; any fix
+    that cannot be guaranteed safe is left for the reviewer.
+    """
+    text = _ensure_heading_blank_lines(text)
+    text = _renumber_citations(text)
+    stripped = text.rstrip("\n")
+    return f"{stripped}\n\n" if stripped else text
+
+
 def cited_urls(text: str) -> list[str]:
     """Return every URL listed in the citations section, in order."""
     lines = text.splitlines()

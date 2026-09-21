@@ -50,11 +50,13 @@ class RunTrace:
         entry["prompt"] += getattr(usage, "prompt_tokens", 0) or 0
         entry["completion"] += getattr(usage, "completion_tokens", 0) or 0
         entry["total"] += getattr(usage, "total_tokens", 0) or 0
+        call_total = getattr(usage, "total_tokens", 0) or 0
         self.log(
             "llm_usage",
             agent=agent,
             model=model,
-            total=getattr(usage, "total_tokens", 0),
+            total=call_total,
+            message=f"{call_total} tokens",
         )
 
     def save(self) -> Path:

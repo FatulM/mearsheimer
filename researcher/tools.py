@@ -13,6 +13,7 @@ import contextlib
 import io
 import json
 import re
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -334,20 +335,46 @@ class Toolbox:
         return json.dumps(result, ensure_ascii=False)
 
     def web_search(self, query: str, max_results: int = 5) -> list[dict[str, str]]:
-        """Search the web with ddgs and register every returned URL."""
-        results: list[dict[str, str]] = []
-        with DDGS() as ddgs:
-            for item in ddgs.text(query, max_results=max_results):
-                url = item.get("href") or item.get("url") or ""
-                if not url:
-                    continue
-                title = item.get("title", "")
-                self.registry.add(url, title=title, origin="search")
-                self.seen_urls.add(url)
-                results.append(
-                    {"title": title, "url": url, "snippet": item.get("body", "")}
-                )
-        return results
+        """Search the web with ddgs and register every returned URL.
+
+        The duckduckgo backend is pinned (instead of ddgs' default metasearch
+        fan-out) to avoid flaky auxiliary providers, and transient network
+        failures are retried a few times before being surfaced to the agent.
+        """
+        last_error = ""
+        for attempt in range(3):
+            try:
+                results: list[dict[str, str]] = []
+                with DDGS() as ddgs:
+                    for item in ddgs.text(
+                        query, max_results=max_results, backend="duckduckgo"
+                    ):
+                        url = item.get("href") or item.get("url") or ""
+                        if not url:
+                            continue
+                        title = item.get("title", "")
+                        self.registry.add(url, title=title, origin="search")
+                        self.seen_urls.add(url)
+                        results.append(
+                            {
+                                "title": title,
+                                "url": url,
+                                "snippet": item.get("body", ""),
+                            }
+                        )
+                if results:
+                    return results
+                last_error = "no results found"
+                break
+            except Exception as exc:  # noqa: BLE001
+                last_error = str(exc)
+                if (
+                    "no results found" in last_error.lower()
+                    or "timed out" in last_error.lower()
+                ):
+                    break
+                time.sleep(1.0 + attempt)
+        raise RuntimeError(f"web_search failed for {query!r}: {last_error}")
 
     def fetch_url(self, url: str) -> dict[str, Any]:
         """Fetch a URL and return cleaned main text; supports HTML and PDF."""

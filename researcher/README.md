@@ -32,7 +32,7 @@ RESEARCHER_MAX_REVIEW_ROUNDS=3
 RESEARCHER_REQUEST_TIMEOUT=120
 ```
 
-No search API key is needed: `web_search` uses DuckDuckGo via `ddgs`.
+No search API key is needed: `web_search` uses DuckDuckGo via `ddgs` (pinned to the `duckduckgo` backend and retried on transient network errors).
 
 ## Usage
 
@@ -53,13 +53,13 @@ Inputs are `content/episode-N.md` (the Persian post) and `processed/episode-N.md
 3. **Research subagents** (`LLM_MODEL_AGENT_RESEARCH`) — one agent per topic, run concurrently, each with `web_search`, `fetch_url`, `url_alive`, `read_transcript`, and `note_write`. Notes are saved under the run directory.
 4. **Writer** (`LLM_MODEL_AGENT_LEAD`) — compose the full cited critique from the post, transcript, and notes.
 5. **Reviewer/fixer** (`LLM_MODEL_AGENT_REVIEWER`) — fact-check and repair the draft, iterating until the deterministic gates pass.
-6. **Gates** — pure-Python checks decide whether to write the result.
+6. **Mechanical repair + gates** — `repair_mechanical` applies safe deterministic fixes, then pure-Python gates decide whether to write the result.
 
 ## Tools
 
 | Tool | Purpose |
 |---|---|
-| `web_search` | DuckDuckGo search; registers every returned URL |
+| `web_search` | DuckDuckGo search (pinned `duckduckgo` backend, retried on network errors); registers every returned URL |
 | `fetch_url` | Fetch and extract main text from HTML or PDF; registers provenance |
 | `url_alive` | HTTP liveness check (bot-block statuses count as reachable) |
 | `read_transcript` | Look up transcript chapters by timestamp or title |
@@ -77,6 +77,8 @@ The result is written only when every gate passes:
 - every cited URL was actually retrieved during the run (provenance) and is reachable (liveness);
 - no bracketed markers other than `[cite: N]`.
 
+Before every gate check, `repair_mechanical` applies safe deterministic fixes — blank lines after headings, citation entries renumbered into first-reference order (when the mapping is bijective), and a trailing blank line. Anything that cannot be fixed safely is left for the reviewer.
+
 If the reviewer cannot satisfy the gates within `RESEARCHER_MAX_REVIEW_ROUNDS`, the run exits non-zero and writes the last draft to `files/result/episode-N.failed.md` instead of a false success.
 
 ## Outputs
@@ -89,7 +91,7 @@ researcher/files/
     ├── plan.json                  # topics and coverage map
     ├── notes/<topic>.md           # subagent notes
     ├── draft.md                   # writer output before review
-    ├── review-<k>.md              # each reviewer pass
+    ├── review-<k>.md              # reviewer pass k (draft.md is the pre-review output)
     └── sources.json               # provenance registry
 ```
 
