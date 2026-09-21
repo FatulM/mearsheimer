@@ -24,3 +24,6 @@ build/
 
 # Temporary files
 *tmp*
+
+# Researcher agent run artifacts
+researcher/files/runs/
