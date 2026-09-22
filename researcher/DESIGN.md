@@ -83,6 +83,18 @@ Pure-Python checks, no LLM, mirroring and extending `scripts/check_critiques.py`
 
 Gates run deterministically after every reviewer iteration. Before each gate check, `repair_mechanical` (in `validate.py`) applies safe deterministic fixes: blank lines after headings, citation entries renumbered into first-reference order (only when the mapping is bijective, so it can never mislabel a cite), and a trailing blank line. Fixes that can't be guaranteed safe (e.g. em-dash format parsing) are deliberately left to the reviewer, so the repair layer never corrupts an ambiguous document. The result is written only when all gates pass. If the reviewer cannot reach a passing state within `RESEARCHER_MAX_REVIEW_ROUNDS`, the run exits non-zero and writes the last draft to `files/result/episode-N.failed.md` (never a false "success").
 
+## Language simplification pass (`researcher/simplify.py`)
+
+A separate, second-stage app for language quality. The critique pipeline's models are good at agentic research, but they are not strong Persian writers. This stage makes the finished critique easier to read for Iranian readers without changing what it says.
+
+It runs `python3 researcher/simplify.py N` on the finished `researcher/files/result/episode-N.md` and does not touch that file. It splits the critique at the horizontal rule and keeps the citations section aside, verbatim. It then rewrites the body once with `LLM_MODEL_AGENT_LANGUAGE`, the dedicated Persian-writing model chosen for native-like phrasing.
+
+The body is the only text sent to the language model. The citations section is removed first to cut cost and to keep URLs, titles, and numbering out of the model's hands; it is joined back byte-for-byte. The simplification prompt keeps the H1 title and every `## {mm:ss} - {TITLE}` heading byte-identical, preserves every `[cite: N]` marker, and changes only the wording. It is a simplification pass, not a summary: no claim, judgement, number, or name is dropped, added, or altered.
+
+After the single simplification pass, a reviewer/fixer loop runs. The reviewer (`LLM_MODEL_AGENT_REVIEWER`, no web tools) compares the original body with the simplified body and returns a JSON verdict: `{"ok": bool, "problems": [...], "revised": "<body>"}`. It repairs fidelity problems with minimal edits, never re-simplifying. Deterministic gates run before every reviewer pass and before the write, so structure and citation self-consistency are enforced alongside the model verdict. The loop accepts only when the reviewer reports `ok` and the deterministic gates are clean.
+
+One simplification pass only. The output is `researcher/files/simplify/episode-N.md`; on failure it is `episode-N.failed.md` and the run exits non-zero. Per-run artifacts go under `researcher/files/runs/<timestamp>-episode-N-language/` (`trace.json`, `original.md`, `citations.md`, `simplified-body-0.md`, `review-<k>.md`), using the same timestamp format and run layout as `main.py`.
+
 ## Tools (`researcher/tools.py`)
 
 | Tool | Backend | Returns |
@@ -105,6 +117,7 @@ LLM_MODEL_AGENT_PLANNER=<model>
 LLM_MODEL_AGENT_LEAD=<model>       # lead / writer
 LLM_MODEL_AGENT_RESEARCH=<model>   # topic subagents
 LLM_MODEL_AGENT_REVIEWER=<model>
+LLM_MODEL_AGENT_LANGUAGE=<model>   # Persian-writing model for simplify.py
 ```
 
 Existing `LLM_BASE_URL` and `LLM_API_KEY` are reused. No search API key is needed (DuckDuckGo). Optional tuning knobs (env with sane defaults): `RESEARCHER_MAX_TOPICS`, `RESEARCHER_MAX_TOOL_CALLS`, `RESEARCHER_MAX_REVIEW_ROUNDS`, `RESEARCHER_REQUEST_TIMEOUT`.
@@ -135,9 +148,13 @@ researcher/
 │   ├── planner.md
 │   ├── researcher.md
 │   ├── writer.md
-│   └── reviewer.md
+│   ├── reviewer.md
+│   ├── simplify.md
+│   └── simplify-reviewer.md
+├── simplify.py          # second stage: Persian language simplification
 └── files/               # all generated artifacts
     ├── result/episode-N.md
+    ├── simplify/episode-N.md
     └── runs/<timestamp>-episode-N/
         ├── trace.json
         ├── plan.json

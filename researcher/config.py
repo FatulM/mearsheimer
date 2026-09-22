@@ -26,23 +26,27 @@ PROCESSED_DIR = ROOT / "processed"
 PROMPTS_DIR = RESEARCHER_DIR / "prompts"
 FILES_DIR = RESEARCHER_DIR / "files"
 RESULT_DIR = FILES_DIR / "result"
+SIMPLIFY_DIR = FILES_DIR / "simplify"
 RUNS_DIR = FILES_DIR / "runs"
 
 PLANNER = "planner"
 LEAD = "lead"
 RESEARCH = "research"
 REVIEWER = "reviewer"
+LANGUAGE = "language"
 
 ROLE_ENV = {
     PLANNER: "LLM_MODEL_AGENT_PLANNER",
     LEAD: "LLM_MODEL_AGENT_LEAD",
     RESEARCH: "LLM_MODEL_AGENT_RESEARCH",
     REVIEWER: "LLM_MODEL_AGENT_REVIEWER",
+    LANGUAGE: "LLM_MODEL_AGENT_LANGUAGE",
 }
 
 DEFAULT_MAX_TOPICS = 8
 DEFAULT_MAX_TOOL_CALLS = 25
 DEFAULT_MAX_REVIEW_ROUNDS = 3
+DEFAULT_MAX_LANGUAGE_ROUNDS = 3
 DEFAULT_REQUEST_TIMEOUT = 120
 
 
@@ -56,6 +60,7 @@ class Settings:
     max_topics: int
     max_tool_calls: int
     max_review_rounds: int
+    max_language_rounds: int
     request_timeout: int
 
     def model(self, role: str) -> str:
@@ -82,6 +87,7 @@ def load_settings(
     max_topics: int | None = None,
     max_tool_calls: int | None = None,
     max_review_rounds: int | None = None,
+    max_language_rounds: int | None = None,
     request_timeout: int | None = None,
 ) -> Settings:
     """Load `.env` and resolve settings, applying CLI overrides when given."""
@@ -124,6 +130,9 @@ def load_settings(
         max_review_rounds=max_review_rounds
         if max_review_rounds is not None
         else _int_env("RESEARCHER_MAX_REVIEW_ROUNDS", DEFAULT_MAX_REVIEW_ROUNDS),
+        max_language_rounds=max_language_rounds
+        if max_language_rounds is not None
+        else _int_env("RESEARCHER_LANGUAGE_MAX_ROUNDS", DEFAULT_MAX_LANGUAGE_ROUNDS),
         request_timeout=request_timeout
         if request_timeout is not None
         else _int_env("RESEARCHER_REQUEST_TIMEOUT", DEFAULT_REQUEST_TIMEOUT),

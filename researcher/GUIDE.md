@@ -83,6 +83,7 @@ Responsibility map:
 | Structured run log + tokens | `trace.py` |
 | Deterministic gates + mechanical repair | `validate.py` |
 | Agent behaviour specs | `prompts/*.md` |
+| Language simplification stage | `simplify.py` |
 
 ---
 
@@ -226,6 +227,34 @@ Focus questions:
 
 Read each prompt against `validate.py`. The deterministic gates enforce or mirror every constraint in the prompts. The prompts drifted before. The writer once emitted three-field-slash entries. Reviewers once rewrote whole chapters. The gates and the improved prompts keep the product stable.
 
+### 4.9 `simplify.py` — the language stage
+
+`simplify.py` is the second stage of the `researcher/` app. It makes a finished critique easier to read. It does not change what the critique says.
+
+Run `python3 researcher/simplify.py N` after `main.py` writes the result. The stage reads `researcher/files/result/episode-N.md`. It writes a new file at `researcher/files/simplify/episode-N.md`. The original result file stays unchanged.
+
+The stage does these steps:
+
+1. Split the critique at the horizontal rule.
+2. Keep the citations section aside.
+3. Send only the body to `LLM_MODEL_AGENT_LANGUAGE`.
+4. Join the citations section back.
+5. Run the reviewer/fixer loop.
+
+The language model rewrites the body one time. The prompt tells the model to keep the H1 title and every chapter heading the same. The prompt tells the model to keep every `[cite: N]` marker the same. The prompt tells the model to change only the words.
+
+The reviewer uses `LLM_MODEL_AGENT_REVIEWER`. It compares the original body with the new body. It returns one JSON object: `{"ok": bool, "problems": [...], "revised": "..."}`. It repairs each problem with a small edit. It never simplifies the text again.
+
+Deterministic gates run before each reviewer pass and before the write. The gates check the structure and the citation markers. The loop stops when the reviewer reports `ok` and the gates pass. The loop also stops after `RESEARCHER_LANGUAGE_MAX_ROUNDS` passes.
+
+If the loop does not stop cleanly, the stage writes `episode-N.failed.md` and exits non-zero. The run directory is `researcher/files/runs/<timestamp>-episode-N-language/`. It holds `trace.json`, `original.md`, `citations.md`, `simplified-body-0.md`, and `review-<k>.md`.
+
+Focus questions:
+
+- Which model rewrites the body? Which model reviews it?
+- Why does the stage remove the citations section before the rewrite?
+- When does the loop stop?
+
 ---
 
 ## 5. Run artifacts — how to read a run
@@ -343,9 +372,11 @@ LLM_MODEL_AGENT_PLANNER=...   # optional, falls back to LLM_MODEL
 LLM_MODEL_AGENT_LEAD=...      #  ^ the writer / lead
 LLM_MODEL_AGENT_RESEARCH=...  #  ^ topic subagents
 LLM_MODEL_AGENT_REVIEWER=...  #  ^ reviewer/fixer
+LLM_MODEL_AGENT_LANGUAGE=...  #  ^ Persian-writing model for simplify.py
 RESEARCHER_MAX_TOPICS=8
 RESEARCHER_MAX_TOOL_CALLS=25
 RESEARCHER_MAX_REVIEW_ROUNDS=3
+RESEARCHER_LANGUAGE_MAX_ROUNDS=3
 RESEARCHER_REQUEST_TIMEOUT=120
 ```
 

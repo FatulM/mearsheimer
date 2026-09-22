@@ -21,6 +21,7 @@ LLM_MODEL_AGENT_PLANNER=deepseek-v4.1-flash
 LLM_MODEL_AGENT_LEAD=deepseek-v4.1-flash
 LLM_MODEL_AGENT_RESEARCH=deepseek-v4.1-flash
 LLM_MODEL_AGENT_REVIEWER=deepseek-v4.1-flash
+LLM_MODEL_AGENT_LANGUAGE=gemini-3.8-flash
 ```
 
 Optional tuning knobs (with defaults):
@@ -29,6 +30,7 @@ Optional tuning knobs (with defaults):
 RESEARCHER_MAX_TOPICS=8
 RESEARCHER_MAX_TOOL_CALLS=25
 RESEARCHER_MAX_REVIEW_ROUNDS=3
+RESEARCHER_LANGUAGE_MAX_ROUNDS=3
 RESEARCHER_REQUEST_TIMEOUT=120
 ```
 
@@ -93,6 +95,35 @@ researcher/files/
     ├── draft.md                   # writer output before review
     ├── review-<k>.md              # reviewer pass k (draft.md is the pre-review output)
     └── sources.json               # provenance registry
+```
+
+## Language simplification (`simplify.py`)
+
+`python3 researcher/simplify.py N [--verbose] [--max-rounds K] [--out PATH] [--resume RUN_ID]` is a separate, second-stage pass that runs after `main.py`. It makes the finished Persian critique easier to read without changing what it says.
+
+It reads the cited critique from `researcher/files/result/episode-N.md`. The original file is never modified. It splits the critique at the horizontal rule, keeps the citations section aside verbatim, and rewrites only the body once with `LLM_MODEL_AGENT_LANGUAGE` — the Persian-writing model (for example `gemini-3.8-flash`). A reviewer/fixer loop (`LLM_MODEL_AGENT_REVIEWER`) then compares the original body with the simplified body and repairs every fidelity problem it finds: dropped, added, or altered claims, numbers, names, and verdicts; changed headings; and changed `[cite: N]` markers. The loop repeats until the reviewer reports no problem, or until `RESEARCHER_LANGUAGE_MAX_ROUNDS` passes are used.
+
+One simplification pass only. The reviewer fixes the simplified text; it never re-simplifies it. Deterministic gates (heading parity with the original result, structure, one `---`, citation self-consistency) run before every reviewer pass and before the write, so a broken structure is never written as a success.
+
+The simplified critique goes to `researcher/files/simplify/episode-N.md`. If the loop cannot reach a clean state, the run exits non-zero and writes `researcher/files/simplify/episode-N.failed.md` instead.
+
+Per-run artifacts go under `researcher/files/runs/<timestamp>-episode-N-language/`:
+
+```
+researcher/files/runs/<timestamp>-episode-N-language/
+├── trace.json                 # every agent step and token usage
+├── original.md                # the input critique, kept intact
+├── citations.md               # the stripped citations section (verbatim)
+├── simplified-body-0.md       # the single simplification pass
+└── review-<k>.md              # reviewer-corrected body after fix pass k
+```
+
+```bash
+source .venv/bin/activate
+python3 researcher/simplify.py 2
+python3 researcher/simplify.py 2 --verbose --max-rounds 2
+python3 researcher/simplify.py 2 --out /tmp/episode-2.simple.md
+python3 researcher/simplify.py 2 --resume 20260922-101500-episode-2-language
 ```
 
 ## Validating the deterministic gates standalone

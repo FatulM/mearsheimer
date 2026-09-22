@@ -94,6 +94,7 @@ LLM_MODEL_AGENT_PLANNER=deepseek-v4.1-flash
 LLM_MODEL_AGENT_LEAD=deepseek-v4.1-flash
 LLM_MODEL_AGENT_RESEARCH=deepseek-v4.1-flash
 LLM_MODEL_AGENT_REVIEWER=deepseek-v4.1-flash
+LLM_MODEL_AGENT_LANGUAGE=gemini-3.8-flash
 ```
 
 Every script prefers a role-specific variable and falls back to the base `LLM_MODEL` when that variable is unset (failing only if both are missing):
@@ -104,7 +105,7 @@ Every script prefers a role-specific variable and falls back to the base `LLM_MO
 - `LLM_MODEL_FIX` — fix scripts (`fix_translation.py`)
 - `LLM_MODEL_SIMPLIFY` — simplification scripts (`simplify_language.py`, `simplify_critique.py`)
 - `LLM_MODEL_CRITIQUE` — fact-checking with the `web_search` tool (`critique_content.py`, `critique_content_cite.py`, `check_web_tool.py`)
-- `LLM_MODEL_AGENT_PLANNER`, `LLM_MODEL_AGENT_LEAD`, `LLM_MODEL_AGENT_RESEARCH`, `LLM_MODEL_AGENT_REVIEWER` — the agentic critique app (`researcher/`); see "Researcher Agent"
+- `LLM_MODEL_AGENT_PLANNER`, `LLM_MODEL_AGENT_LEAD`, `LLM_MODEL_AGENT_RESEARCH`, `LLM_MODEL_AGENT_REVIEWER`, `LLM_MODEL_AGENT_LANGUAGE` — the agentic critique app (`researcher/`); `LLM_MODEL_AGENT_LANGUAGE` is the Persian-writing model for the simplification pass (`simplify.py`), the rest are used by `main.py`. See "Researcher Agent"
 
 ## Prompts (`prompts/`)
 
@@ -134,6 +135,10 @@ Every script prefers a role-specific variable and falls back to the base `LLM_MO
 `python3 researcher/main.py N [--verbose] [--max-topics K] [--max-tool-calls K] [--max-review-rounds K] [--out PATH] [--resume RUN_ID]` is an agentic replacement for the critique scripts. It reads `content/episode-N.md` and `processed/episode-N.md`, plans research topics (`LLM_MODEL_AGENT_PLANNER`), runs one research subagent per topic in parallel with real client-side tools (`web_search` via `ddgs`, `fetch_url` for HTML/PDF, `url_alive`, `read_transcript`, `note_write`) using `LLM_MODEL_AGENT_RESEARCH`, writes the cited critique with `LLM_MODEL_AGENT_LEAD`, then a reviewer/fixer (`LLM_MODEL_AGENT_REVIEWER`) fact-checks and repairs it, applying deterministic mechanical repairs (`repair_mechanical` in `validate.py`) before each gate check, until the deterministic gates pass (heading parity, citation self-consistency, URL provenance and liveness).
 
 Output goes to `researcher/files/result/episode-N.md`; per-run artifacts (trace, plan, notes, draft, reviewer passes, sources) go under `researcher/files/runs/<timestamp>-episode-N/` (gitignored). If the gates cannot be satisfied, it exits non-zero and writes `episode-N.failed.md` instead. See `researcher/DESIGN.md` and `researcher/README.md`.
+
+### Language Simplification
+
+`python3 researcher/simplify.py N [--verbose] [--max-rounds K] [--out PATH] [--resume RUN_ID]` is a separate, second-stage pass over the finished critique. It reads `researcher/files/result/episode-N.md`, strips the citations section (kept aside verbatim), rewrites the body once in plainer Persian with `LLM_MODEL_AGENT_LANGUAGE`, then a reviewer/fixer loop (`LLM_MODEL_AGENT_REVIEWER`) compares the original body with the simplified body and repairs fidelity problems (dropped/added/altered claims, changed headings, changed `[cite: N]` markers) until it reports none. One simplification pass only; the reviewer fixes, it never re-simplifies. The original result is left untouched; the simplified critique goes to `researcher/files/simplify/episode-N.md` (or `.failed.md`), with per-run artifacts under `researcher/files/runs/<timestamp>-episode-N-language/` (track `trace.json`, `original.md`, `citations.md`, `simplified-body-0.md`, `review-<k>.md`). See `researcher/DESIGN.md` and `researcher/README.md`.
 
 ### Translation Check & Fix Pipeline
 
