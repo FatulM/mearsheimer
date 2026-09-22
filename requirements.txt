@@ -12,6 +12,8 @@ tenacity>=9.1,<10
 trafilatura>=2.2,<3
 # Suggested: PDF text extraction for fetch_url (reports/papers)
 pypdf>=6.19,<7
+# Optional: for pypdf pdf parsing
+fonttools>=4.65,<5
 
 # Only for development:
 ruff>=0.16,<0.17
