@@ -80,42 +80,42 @@
 
 ---
 
-1. پرونده نسل‌کشی آفریقای جنوبی علیه اسرائیل — South Africa's genocide case against Israel / Wikipedia — https://en.wikipedia.org/wiki/South_Africa's_genocide_case_against_Israel
-2. نتیجه‌گیری عفو بین‌الملل درباره نسل‌کشی در غزه — Amnesty International concludes Israel is committing genocide in Gaza / Amnesty International — https://www.amnesty.org/en/latest/news/2024/12/amnesty-international-concludes-israel-is-committing-genocide-against-palestinians-in-gaza/
-3. تغییر سیاست آمریکا در قبال اوکراین و ناتو — Experts examine what the U.S. policy shifts on Ukraine mean for NATO / PBS NewsHour — https://www.pbs.org/newshour/show/experts-examine-what-the-u-s-policy-shifts-on-ukraine-mean-for-nato
-4. کارنامه شش‌ماهه جنگ ایران و اهداف آمریکا — What has the US achieved in Iran war? A report card after 6 months / CSMonitor — https://www.csmonitor.com/USA/Military/2026/0828/iran-war-trump-objectives-six-months
-5. آمریکا در جنگ ایران تقریباً در همه شاخص‌ها بازنده است — By Nearly Every Metric, the U.S. Is Losing the Iran War / Foreign Policy — https://foreignpolicy.com/2026/09/17/trump-united-states-losing-iran-war/
-6. شش ماه پس از جنگ، رژیم ایران همچنان مستقر است — After 6 months of war, Iran's battered regime remains entrenched / NPR — https://www.npr.org/2026/08/28/nx-s1-5947854/us-iran-war
-7. آمریکا و اسرائیل در ایران به چه چیزی می‌توانند برسند؟ — What Can the United States and Israel Accomplish in Iran? / CSIS — https://www.csis.org/analysis/what-can-united-states-and-israel-accomplish-iran
-8. تضعیف شبکه نیابتی ایران — The Degradation of Iran's Proxy Model / Belfer Center — https://www.belfercenter.org/research-analysis/degradation-irans-proxy-model
-9. بحران تنگه هرمز ۲۰۲۶ — 2026 Strait of Hormuz crisis / Wikipedia — https://en.wikipedia.org/wiki/2026_Strait_of_Hormuz_crisis
-10. گزارش پنتاگون درباره خسارت به پایگاه‌های آمریکا — Pentagon damage report: Iranian strikes damaged and destroyed hundreds of buildings at US bases / Fortune — https://fortune.com/2026/09/14/pentagon-damage-report-iran-war-hundreds-buildings-us-bases-aircraft/
-11. جنگ ایران و خارج شدن اتحاد آمریکا و کشورهای خلیج فارس از سایه — The Iran war has forced the US-Gulf alliance out of the shadows / Atlantic Council — https://www.atlanticcouncil.org/blogs/menasource/the-iran-war-has-forced-the-us-gulf-alliance-out-of-the-shadows/
-12. هشدار سازمان ملل درباره خطر رکود جهانی به‌دلیل بحران هرمز — Hormuz crisis strangling global economy, Guterres warns / UN News — https://news.un.org/en/story/2026/04/1167411
-13. چین و تبدیل بحران هرمز به یک مزیت — How China Turned the Strait of Hormuz Crisis into an Advantage / The National Interest — https://nationalinterest.org/blog/energy-world/how-china-turned-the-strait-of-hormuz-crisis-into-an-advantage
-14. متن کامل یادداشت تفاهم ترامپ با ایران — Full text of Trump's framework agreement to end Iran war / NPR — https://www.npr.org/2026/06/18/nx-s1-5863027/us-iran-trump-memorandum-of-understanding-full-text
-15. بند ۵ توافق؛ بندی که می‌تواند توافق صلح آمریکا و ایران را بسازد یا نابود کند — Clause 5: the one clause that could make or break US-Iran peace deal / Gulf News — https://gulfnews.com/world/mena/clause-5-the-one-clause-that-could-make-or-break-us-iran-peace-deal-1.500593176
-16. یادداشت تفاهم اسلام‌آباد — Islamabad Memorandum / Wikipedia — https://en.wikipedia.org/wiki/Islamabad_Memorandum
-17. بیست پرسش و پاسخ کارشناسی درباره جنگ ایران — Twenty questions (and expert answers) about the Iran war / Atlantic Council — https://www.atlanticcouncil.org/dispatches/twenty-questions-and-expert-answers-about-the-iran-war/
-18. پنج سناریو برای جنگ زمینی آمریکا در ایران — Five Scenarios for a U.S. Ground War on Iran / Foreign Policy — https://foreignpolicy.com/2026/03/31/scenarios-ground-war-iran-trump-israel-kharg-hormuz-oil/
-19. ایران: حملات آمریکا و اسرائیل کجا و چگونه به غیرنظامیان آسیب می‌زند — Iran: Where and how US-Israeli strikes are harming civilians / ACLED — https://acleddata.com/report/iran-where-and-how-us-israeli-strikes-are-harming-civilians
-20. حمله به زیرساخت انرژی و آب ایران راهبرد برنده‌ای نیست — Attacking Iran's energy and water infrastructure is not a winning strategy / Atlantic Council — https://www.atlanticcouncil.org/dispatches/attacking-irans-energy-and-water-infrastructure-is-not-a-winning-strategy/
-21. ماده ۵ یادداشت تفاهم و علت درگیری‌های تنگه هرمز — What is Article 5 of Iran-US MoU, and why is it blamed for Hormuz strikes? / Al Jazeera — https://www.aljazeera.com/news/2026/6/28/why-is-article-5-of-mou-causing-confrontations-in-the-strait-of-hormuz
-22. سه نکته درباره محاصره‌های دریایی و گشت‌زنی آمریکا در تنگه هرمز — 3 things to know about naval blockades as the U.S. patrols the Strait of Hormuz / NPR — https://www.npr.org/2026/04/16/nx-s1-5783870/strait-of-hormuz-naval-blockade
-23. محاصره دریایی ایران توسط آمریکا در ۲۰۲۶ — 2026 United States naval blockade of Iran / Wikipedia — https://en.wikipedia.org/wiki/2026_United_States_naval_blockade_of_Iran
-24. حمله ۲۰۲۶ به جزیره خارگ — 2026 Kharg Island attack / Wikipedia — https://en.wikipedia.org/wiki/2026_Kharg_Island_attack
-25. ایران و آمادگی برای عملیات زمینی آمریکا همزمان با پایان مهلت تفاهم‌نامه — Iran signals readiness for 'US ground operations' as MoU expires / Al Jazeera — https://www.aljazeera.com/news/2026/8/17/iran-signals-readiness-for-us-ground-operations-as-mou-expires
-26. گاه‌شمار جنگ ایران ۲۰۲۶ — Timeline of the 2026 Iran war / Wikipedia — https://en.wikipedia.org/wiki/Timeline_of_the_2026_Iran_war
-27. ترامپ و ضرب‌الاجل‌هایش برای ایران — Trump's Iran deadline threats / Politico — https://www.politico.com/news/2026/04/07/trump-iran-deadline-threats-00861313
-28. ارتش آمریکا: بیش از ۱۳ هزار هدف در ۳۸ روز بمباران شد — US military says it struck 13,000 targets in 38 days of Iran war / USA Today — https://www.usatoday.com/story/news/politics/2026/04/08/us-military-strikes-iran-war/89514196007/
-29. حمله ۲۰۲۶ به پل بی ۱ کرج — 2026 Karaj B1 bridge attack / Wikipedia — https://en.wikipedia.org/wiki/2026_Karaj_B1_bridge_attack
-30. تاریخ تهدیدهای آمریکا به بمباران ایران «به عصر حجر» — 'Bomb back to the Stone Age': US history of threats and carpet bombing / Al Jazeera — https://www.aljazeera.com/news/2026/4/2/bomb-back-to-the-stone-age-us-history-of-threats-and-carpet-bombing
-31. نیروی دریایی سپاه مسیر امنیتی عمان در تنگه هرمز را رد کرد — IRGC Navy Rejects Oman's Safe-Passage Plan for Strait of Hormuz / The Maritime Executive — https://maritime-executive.com/article/irgc-navy-rejects-imo-s-safe-passage-plan-for-strait-of-hormuz
-32. ترامپ حمله به ایران را پس از رسیدن به چارچوب توافق لغو کرد — Trump: Planned attack on Iran canceled after reaching outline of deal / CNBC — https://www.cnbc.com/2026/08/02/trump-planned-attack-on-iran-canceled-after-reaching-outline-of-deal.html
-33. ایران پس از حمله آمریکا به جزیره لارک به پایگاه‌های آمریکا در اردن حمله کرد — Iran attacks US bases in Jordan after US strikes Larak Island / Al Jazeera — https://www.aljazeera.com/news/2026/8/30/us-strikes-irans-lark-island-in-first-attack-in-weeks
-34. آخرین فشنگ‌ها؟ وضعیت مهمات کلیدی در آتش‌بس جنگ ایران — Last Rounds? Status of Key Munitions at the Iran War Ceasefire / CSIS — https://www.csis.org/analysis/last-rounds-status-key-munitions-iran-war-ceasefire
-35. یک ماه پس از آغاز: جنگی که نتوانست ایران را بشکند — One Month In: The War That Failed to Break Iran / Australian Institute of International Affairs — https://www.internationalaffairs.org.au/australianoutlook/one-month-in-the-war-that-failed-to-break-iran/
-36. ایران چقدر می‌تواند محاصره هرمز را تحمل کند؟ — How long can Iran survive the US's Hormuz blockade? / Al Jazeera — https://www.aljazeera.com/news/2026/4/24/how-long-can-iran-survive-the-uss-hormuz-blockade
-37. ایران پیچ را محکم‌تر می‌کند — Iran Tightens the Screws / John Mearsheimer Substack — https://mearsheimer.substack.com/p/iran-tightens-the-screws
-38. ایران با ترامپ سخت بازی می‌کند — Iran Plays Tough with Trump / John Mearsheimer Substack — https://mearsheimer.substack.com/p/iran-plays-tough-with-trump
+1. پرونده نسل‌کشی آفریقای جنوبی علیه اسرائیل — South Africa's genocide case against Israel (Wikipedia) — https://en.wikipedia.org/wiki/South_Africa's_genocide_case_against_Israel
+2. نتیجه‌گیری عفو بین‌الملل درباره نسل‌کشی در غزه — Amnesty International concludes Israel is committing genocide in Gaza (Amnesty International) — https://www.amnesty.org/en/latest/news/2024/12/amnesty-international-concludes-israel-is-committing-genocide-against-palestinians-in-gaza/
+3. تغییر سیاست آمریکا در قبال اوکراین و ناتو — Experts examine what the U.S. policy shifts on Ukraine mean for NATO (PBS NewsHour) — https://www.pbs.org/newshour/show/experts-examine-what-the-u-s-policy-shifts-on-ukraine-mean-for-nato
+4. کارنامه شش‌ماهه جنگ ایران و اهداف آمریکا — What has the US achieved in Iran war? A report card after 6 months (CSMonitor) — https://www.csmonitor.com/USA/Military/2026/0828/iran-war-trump-objectives-six-months
+5. آمریکا در جنگ ایران تقریباً در همه شاخص‌ها بازنده است — By Nearly Every Metric, the U.S. Is Losing the Iran War (Foreign Policy) — https://foreignpolicy.com/2026/09/17/trump-united-states-losing-iran-war/
+6. شش ماه پس از جنگ، رژیم ایران همچنان مستقر است — After 6 months of war, Iran's battered regime remains entrenched (NPR) — https://www.npr.org/2026/08/28/nx-s1-5947854/us-iran-war
+7. آمریکا و اسرائیل در ایران به چه چیزی می‌توانند برسند؟ — What Can the United States and Israel Accomplish in Iran? (CSIS) — https://www.csis.org/analysis/what-can-united-states-and-israel-accomplish-iran
+8. تضعیف شبکه نیابتی ایران — The Degradation of Iran's Proxy Model (Belfer Center) — https://www.belfercenter.org/research-analysis/degradation-irans-proxy-model
+9. بحران تنگه هرمز ۲۰۲۶ — 2026 Strait of Hormuz crisis (Wikipedia) — https://en.wikipedia.org/wiki/2026_Strait_of_Hormuz_crisis
+10. گزارش پنتاگون درباره خسارت به پایگاه‌های آمریکا — Pentagon damage report: Iranian strikes damaged and destroyed hundreds of buildings at US bases (Fortune) — https://fortune.com/2026/09/14/pentagon-damage-report-iran-war-hundreds-buildings-us-bases-aircraft/
+11. جنگ ایران و خارج شدن اتحاد آمریکا و کشورهای خلیج فارس از سایه — The Iran war has forced the US-Gulf alliance out of the shadows (Atlantic Council) — https://www.atlanticcouncil.org/blogs/menasource/the-iran-war-has-forced-the-us-gulf-alliance-out-of-the-shadows/
+12. هشدار سازمان ملل درباره خطر رکود جهانی به‌دلیل بحران هرمز — Hormuz crisis strangling global economy, Guterres warns (UN News) — https://news.un.org/en/story/2026/04/1167411
+13. چین و تبدیل بحران هرمز به یک مزیت — How China Turned the Strait of Hormuz Crisis into an Advantage (The National Interest) — https://nationalinterest.org/blog/energy-world/how-china-turned-the-strait-of-hormuz-crisis-into-an-advantage
+14. متن کامل یادداشت تفاهم ترامپ با ایران — Full text of Trump's framework agreement to end Iran war (NPR) — https://www.npr.org/2026/06/18/nx-s1-5863027/us-iran-trump-memorandum-of-understanding-full-text
+15. بند ۵ توافق؛ بندی که می‌تواند توافق صلح آمریکا و ایران را بسازد یا نابود کند — Clause 5: the one clause that could make or break US-Iran peace deal (Gulf News) — https://gulfnews.com/world/mena/clause-5-the-one-clause-that-could-make-or-break-us-iran-peace-deal-1.500593176
+16. یادداشت تفاهم اسلام‌آباد — Islamabad Memorandum (Wikipedia) — https://en.wikipedia.org/wiki/Islamabad_Memorandum
+17. بیست پرسش و پاسخ کارشناسی درباره جنگ ایران — Twenty questions (and expert answers) about the Iran war (Atlantic Council) — https://www.atlanticcouncil.org/dispatches/twenty-questions-and-expert-answers-about-the-iran-war/
+18. پنج سناریو برای جنگ زمینی آمریکا در ایران — Five Scenarios for a U.S. Ground War on Iran (Foreign Policy) — https://foreignpolicy.com/2026/03/31/scenarios-ground-war-iran-trump-israel-kharg-hormuz-oil/
+19. ایران: حملات آمریکا و اسرائیل کجا و چگونه به غیرنظامیان آسیب می‌زند — Iran: Where and how US-Israeli strikes are harming civilians (ACLED) — https://acleddata.com/report/iran-where-and-how-us-israeli-strikes-are-harming-civilians
+20. حمله به زیرساخت انرژی و آب ایران راهبرد برنده‌ای نیست — Attacking Iran's energy and water infrastructure is not a winning strategy (Atlantic Council) — https://www.atlanticcouncil.org/dispatches/attacking-irans-energy-and-water-infrastructure-is-not-a-winning-strategy/
+21. ماده ۵ یادداشت تفاهم و علت درگیری‌های تنگه هرمز — What is Article 5 of Iran-US MoU, and why is it blamed for Hormuz strikes? (Al Jazeera) — https://www.aljazeera.com/news/2026/6/28/why-is-article-5-of-mou-causing-confrontations-in-the-strait-of-hormuz
+22. سه نکته درباره محاصره‌های دریایی و گشت‌زنی آمریکا در تنگه هرمز — 3 things to know about naval blockades as the U.S. patrols the Strait of Hormuz (NPR) — https://www.npr.org/2026/04/16/nx-s1-5783870/strait-of-hormuz-naval-blockade
+23. محاصره دریایی ایران توسط آمریکا در ۲۰۲۶ — 2026 United States naval blockade of Iran (Wikipedia) — https://en.wikipedia.org/wiki/2026_United_States_naval_blockade_of_Iran
+24. حمله ۲۰۲۶ به جزیره خارگ — 2026 Kharg Island attack (Wikipedia) — https://en.wikipedia.org/wiki/2026_Kharg_Island_attack
+25. ایران و آمادگی برای عملیات زمینی آمریکا همزمان با پایان مهلت تفاهم‌نامه — Iran signals readiness for 'US ground operations' as MoU expires (Al Jazeera) — https://www.aljazeera.com/news/2026/8/17/iran-signals-readiness-for-us-ground-operations-as-mou-expires
+26. گاه‌شمار جنگ ایران ۲۰۲۶ — Timeline of the 2026 Iran war (Wikipedia) — https://en.wikipedia.org/wiki/Timeline_of_the_2026_Iran_war
+27. ترامپ و ضرب‌الاجل‌هایش برای ایران — Trump's Iran deadline threats (Politico) — https://www.politico.com/news/2026/04/07/trump-iran-deadline-threats-00861313
+28. ارتش آمریکا: بیش از ۱۳ هزار هدف در ۳۸ روز بمباران شد — US military says it struck 13,000 targets in 38 days of Iran war (USA Today) — https://www.usatoday.com/story/news/politics/2026/04/08/us-military-strikes-iran-war/89514196007/
+29. حمله ۲۰۲۶ به پل بی ۱ کرج — 2026 Karaj B1 bridge attack (Wikipedia) — https://en.wikipedia.org/wiki/2026_Karaj_B1_bridge_attack
+30. تاریخ تهدیدهای آمریکا به بمباران ایران «به عصر حجر» — 'Bomb back to the Stone Age': US history of threats and carpet bombing (Al Jazeera) — https://www.aljazeera.com/news/2026/4/2/bomb-back-to-the-stone-age-us-history-of-threats-and-carpet-bombing
+31. نیروی دریایی سپاه مسیر امنیتی عمان در تنگه هرمز را رد کرد — IRGC Navy Rejects Oman's Safe-Passage Plan for Strait of Hormuz (The Maritime Executive) — https://maritime-executive.com/article/irgc-navy-rejects-imo-s-safe-passage-plan-for-strait-of-hormuz
+32. ترامپ حمله به ایران را پس از رسیدن به چارچوب توافق لغو کرد — Trump: Planned attack on Iran canceled after reaching outline of deal (CNBC) — https://www.cnbc.com/2026/08/02/trump-planned-attack-on-iran-canceled-after-reaching-outline-of-deal.html
+33. ایران پس از حمله آمریکا به جزیره لارک به پایگاه‌های آمریکا در اردن حمله کرد — Iran attacks US bases in Jordan after US strikes Larak Island (Al Jazeera) — https://www.aljazeera.com/news/2026/8/30/us-strikes-irans-lark-island-in-first-attack-in-weeks
+34. آخرین فشنگ‌ها؟ وضعیت مهمات کلیدی در آتش‌بس جنگ ایران — Last Rounds? Status of Key Munitions at the Iran War Ceasefire (CSIS) — https://www.csis.org/analysis/last-rounds-status-key-munitions-iran-war-ceasefire
+35. یک ماه پس از آغاز: جنگی که نتوانست ایران را بشکند — One Month In: The War That Failed to Break Iran (Australian Institute of International Affairs) — https://www.internationalaffairs.org.au/australianoutlook/one-month-in-the-war-that-failed-to-break-iran/
+36. ایران چقدر می‌تواند محاصره هرمز را تحمل کند؟ — How long can Iran survive the US's Hormuz blockade? (Al Jazeera) — https://www.aljazeera.com/news/2026/4/24/how-long-can-iran-survive-the-uss-hormuz-blockade
+37. ایران پیچ را محکم‌تر می‌کند — Iran Tightens the Screws (John Mearsheimer Substack) — https://mearsheimer.substack.com/p/iran-tightens-the-screws
+38. ایران با ترامپ سخت بازی می‌کند — Iran Plays Tough with Trump (John Mearsheimer Substack) — https://mearsheimer.substack.com/p/iran-plays-tough-with-trump
 
