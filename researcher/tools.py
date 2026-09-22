@@ -337,18 +337,19 @@ class Toolbox:
     def web_search(self, query: str, max_results: int = 5) -> list[dict[str, str]]:
         """Search the web with ddgs and register every returned URL.
 
-        The duckduckgo backend is pinned (instead of ddgs' default metasearch
-        fan-out) to avoid flaky auxiliary providers, and transient network
-        failures are retried a few times before being surfaced to the agent.
+        The default metacrawl backend is used: pinning a single provider
+        (e.g. ``duckduckgo``) turns flaky under parallel load and silently
+        returns "No results found." for many queries, so ddgs fans out across
+        its providers instead (as in the original pipeline). Transient network
+        failures and empty responses are retried a few times before being
+        surfaced to the agent.
         """
         last_error = ""
         for attempt in range(3):
             try:
                 results: list[dict[str, str]] = []
                 with DDGS() as ddgs:
-                    for item in ddgs.text(
-                        query, max_results=max_results, backend="duckduckgo"
-                    ):
+                    for item in ddgs.text(query, max_results=max_results):
                         url = item.get("href") or item.get("url") or ""
                         if not url:
                             continue
@@ -365,15 +366,11 @@ class Toolbox:
                 if results:
                     return results
                 last_error = "no results found"
-                break
+                if attempt:
+                    break
             except Exception as exc:  # noqa: BLE001
                 last_error = str(exc)
-                if (
-                    "no results found" in last_error.lower()
-                    or "timed out" in last_error.lower()
-                ):
-                    break
-                time.sleep(1.0 + attempt)
+            time.sleep(0.5 + attempt)
         raise RuntimeError(f"web_search failed for {query!r}: {last_error}")
 
     def fetch_url(self, url: str) -> dict[str, Any]:

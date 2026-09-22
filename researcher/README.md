@@ -32,7 +32,7 @@ RESEARCHER_MAX_REVIEW_ROUNDS=3
 RESEARCHER_REQUEST_TIMEOUT=120
 ```
 
-No search API key is needed: `web_search` uses DuckDuckGo via `ddgs` (pinned to the `duckduckgo` backend and retried on transient network errors).
+No search API key is needed: `web_search` uses DuckDuckGo via `ddgs` (default metacrawl, retried on transient network errors).
 
 ## Usage
 
@@ -59,7 +59,7 @@ Inputs are `content/episode-N.md` (the Persian post) and `processed/episode-N.md
 
 | Tool | Purpose |
 |---|---|
-| `web_search` | DuckDuckGo search (pinned `duckduckgo` backend, retried on network errors); registers every returned URL |
+| `web_search` | DuckDuckGo metacrawl search (retried on transient network errors); registers every returned URL |
 | `fetch_url` | Fetch and extract main text from HTML or PDF; registers provenance |
 | `url_alive` | HTTP liveness check (bot-block statuses count as reachable) |
 | `read_transcript` | Look up transcript chapters by timestamp or title |

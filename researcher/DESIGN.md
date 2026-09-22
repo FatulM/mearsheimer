@@ -87,7 +87,7 @@ Gates run deterministically after every reviewer iteration. Before each gate che
 
 | Tool | Backend | Returns |
 |---|---|---|
-| `web_search(query, max_results)` | `ddgs` (pinned `duckduckgo` backend, 3 attempts with backoff on transient failures) | `[{title, url, snippet}]` |
+| `web_search(query, max_results)` | `ddgs` default metacrawl, 3 attempts with backoff on transient failures | `[{title, url, snippet}]` |
 | `fetch_url(url)` | `requests` + `trafilatura`/`BeautifulSoup`/`lxml` for HTML, `pypdf` for PDF | cleaned `{url, title, text}` (truncated) |
 | `url_alive(url)` | `requests` GET | `{url, status, ok}` (ok `null` = unknown) |
 | `read_transcript(chapter_or_query)` | `processed/episode-N.md` | matching chapter text |
