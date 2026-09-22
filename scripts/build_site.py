@@ -11,7 +11,10 @@ info/episode-N.txt, then renders a complete RTL site under docs/:
   * critique-episode-N.html    - one fact-check page per episode that has a critique/episode-N.md;
                                  it keeps the H1 title and the chapter headings of the article but
                                  carries no YouTube links; every heading links back to the matching
-                                 chapter of the episode page
+                                 chapter of the episode page. A critique whose md carries a
+                                 citations section (`---` + numbered URL list) is rendered as a
+                                 cited page: each `[cite: N]` marker becomes a superscript link
+                                 into the «منابع» references section at the end.
   * assets/style.css           - shared stylesheet (hand-written / LLM-themed)
 
 Content pages carry a small critique icon on the left of the H1 title and of
@@ -49,6 +52,9 @@ H2_RE = re.compile(r"^##\s+(\d{1,2}:\d{2}(?::\d{2})?)\s*-\s*(.+)$")
 BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
 BULLET_RE = re.compile(r"^\s*\*\s+(.+)$")
 ORDERED_RE = re.compile(r"^[۰-۹0-9]+\s*[.)]\s*(.+)$")
+HORIZONTAL_RULE_RE = re.compile(r"^\s*-{3,}\s*$")
+CITE_RE = re.compile(r"\[cite:\s*([0-9]+(?:\s*,\s*[0-9]+)*)\]\s*")
+SOURCE_RE = re.compile(r"^\s*(\d+)\s*[.)]\s*(.+)$")
 
 CRITIQUE_ICON_SVG = (
     '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" '
@@ -87,9 +93,18 @@ MOON_ICON_SVG = (
 )
 
 
+def cite_links(match: re.Match) -> str:
+    """Turn a `[cite: N]`/`[cite: N,M]` inline reference into superscript links."""
+    nums = [n.strip() for n in match.group(1).split(",")]
+    links = ",".join(f'<a href="#source-{n}" title="منبع {n}">{n}</a>' for n in nums)
+    return f'<sup class="cite">[{links}]</sup>'
+
+
 def inline(text: str) -> str:
-    """Escape raw text then turn `**bold**` spans into <strong>."""
+    """Escape raw text then turn `**bold**` into <strong> and cite markers into
+    superscript links."""
     escaped = html.escape(text)
+    escaped = CITE_RE.sub(cite_links, escaped)
     # Replace bold in two steps so nesting/overlap never corrupts the output.
     while BOLD_RE.search(escaped):
         escaped = BOLD_RE.sub(r"<strong>\1</strong>", escaped, count=1)
@@ -152,6 +167,64 @@ def render_ordered(lines: list[str]) -> str:
     """Render consecutive ordered-list lines as an <ol> with Persian numerals kept."""
     items = "\n".join(f"<li>{inline(line)}</li>" for line in lines)
     return f'<ol class="ordered">\n{items}\n</ol>'
+
+
+def split_citations(lines: list[str]) -> tuple[list[str], list[str]]:
+    """Split critique lines into body and a citations section.
+
+    A cited critique separates its chapters from the numbered source list with a
+    single `---` rule; anything after it is treated as the citations section
+    (empty for a plain critique). The H1 title stays in the body.
+    """
+    body: list[str] = []
+    sources: list[str] = []
+    in_sources = False
+    for raw in lines:
+        if not in_sources and HORIZONTAL_RULE_RE.match(raw.strip()):
+            in_sources = True
+            continue
+        if in_sources:
+            if raw.strip():
+                sources.append(raw)
+        else:
+            body.append(raw)
+    return body, sources
+
+
+def render_sources(lines: list[str]) -> str:
+    """Render a cited critique's numbered source list as the «منابع» section.
+
+    Each `{N}. {title} — {outlet} — {url}` entry becomes an <ol> item whose title
+    is a link to the source URL; the URL is echoed in muted LTR text beneath.
+    Every item is anchor `source-N` so the `[cite: N]` superscripts can jump to it.
+    """
+    items = []
+    for raw in lines:
+        m = SOURCE_RE.match(raw.strip())
+        if not m:
+            continue
+        num, content = m.group(1), m.group(2).strip()
+        title, _, url = content.rpartition(" — ")
+        if not title:
+            title = content
+        title_html = inline(title)
+        url = url.strip()
+        if url:
+            link = (
+                f'<a class="source-link" href="{html.escape(url)}" '
+                f'rel="noopener noreferrer" target="_blank">{title_html}</a>'
+                f'<span class="source-url" dir="ltr">{html.escape(url)}</span>'
+            )
+        else:
+            link = title_html
+        items.append(f'<li id="source-{num}">{link}</li>')
+    list_html = "\n".join(items)
+    return (
+        '\n\n<section class="citations">\n'
+        '<h2 id="sources">منابع</h2>\n'
+        f'<ol class="source-list">\n{list_html}\n</ol>\n'
+        "</section>"
+    )
 
 
 def render_body(
@@ -384,6 +457,7 @@ def render_critique_page(n: int, title: str) -> Path | None:
     crit_path = CRITIQUE_DIR / f"episode-{n}.md"
     crit_lines = crit_path.read_text("utf-8").splitlines()
     crit_title = read_content_title(crit_path)
+    body_lines, source_lines = split_citations(crit_lines)
     episode_file = f"episode-{n}.html"
     critique_file = f"critique-episode-{n}.html"
     note = (
@@ -394,11 +468,13 @@ def render_critique_page(n: int, title: str) -> Path | None:
         note
         + "\n\n"
         + render_body(
-            crit_lines[1:],
+            body_lines[1:],
             link_chapters=False,
             content_page=episode_file,
         )
     )
+    if source_lines:
+        body += render_sources(source_lines)
     nav_links = (
         nav_link("index.html", "خانه")
         + " "

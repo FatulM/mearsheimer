@@ -9,7 +9,8 @@ For each critique/episode-N.md (N>=1), verifies:
    - exactly one H1 heading, and it is followed by a blank line
    - only H1 and H2 headings are used
    - every H2 heading is followed by a blank line
-   - no horizontal rules (---), which the critique prompts forbid
+   - no horizontal rules (---), which the critique prompts forbid — except for a
+     cited critique, whose single `---` introduces its numbered source list
 2. Heading fidelity: the critique H1 title and every `## {mm:ss} - {TITLE}`
    chapter heading must be byte-identical, in the same order, to the matching
    content/episode-N.md, so no chapter is dropped, reworded, or retimed.
@@ -31,6 +32,17 @@ CONTENT_DIR = ROOT / "content"
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+)$")
 HORIZONTAL_RULE_RE = re.compile(r"^\s*(?:-{3,}|\*{3,}|_{3,})\s*$")
+SOURCE_ENTRY_RE = re.compile(r"^\s*\d+\s*[.)]\s+.+—\s+https?://\S+\s*$")
+
+
+def is_cited_critique(text: str) -> bool:
+    """True when a `---` rule is followed by a numbered source list (cited)."""
+    lines = text.splitlines()
+    for i, ln in enumerate(lines):
+        if not HORIZONTAL_RULE_RE.match(ln):
+            continue
+        return any(SOURCE_ENTRY_RE.match(a) for a in lines[i + 1 :])
+    return False
 
 
 def extract_headings(text: str) -> list[tuple[int, str]]:
@@ -42,7 +54,7 @@ def extract_headings(text: str) -> list[tuple[int, str]]:
     ]
 
 
-def check_markdown(text: str) -> list[str]:
+def check_markdown(text: str, *, allow_citations: bool = False) -> list[str]:
     """Return a list of markdown structure problems for the critique text."""
     problems = []
     lines = text.splitlines()
@@ -52,8 +64,13 @@ def check_markdown(text: str) -> list[str]:
     if not text.endswith("\n\n") and text.strip():
         problems.append("file does not end with a blank line")
 
-    if any(HORIZONTAL_RULE_RE.match(ln) for ln in lines):
+    rules = [ln for ln in lines if HORIZONTAL_RULE_RE.match(ln)]
+    if rules and not allow_citations:
         problems.append("contains horizontal rules (---)")
+    elif allow_citations and len(rules) != 1:
+        problems.append(
+            f"cited critique must contain exactly one '---' rule (found {len(rules)})"
+        )
 
     headings = extract_headings(text)
     if not headings or headings[0][0] != 1:
@@ -121,7 +138,8 @@ def check_critique(n: int) -> tuple[list[str], Path, Path]:
 
     critique_text = critique_path.read_text("utf-8")
     content_text = content_path.read_text("utf-8")
-    problems = check_markdown(critique_text)
+    cited = is_cited_critique(critique_text)
+    problems = check_markdown(critique_text, allow_citations=cited)
     problems += check_headings_match(extract_headings(critique_text), content_text)
     return problems, critique_path, content_path
 

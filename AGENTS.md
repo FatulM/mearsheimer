@@ -151,7 +151,7 @@ Output goes to `researcher/files/result/episode-N.md`; per-run artifacts (trace,
 
 - Parses each post into semantic RTL Persian HTML (Vazirmatn, shared `docs/assets/style.css`). Each `## {mm:ss} - {TITLE}` becomes a chapter section whose title links to the matching video moment (`&t={seconds}` from `info/episode-N.txt`); the timestamp is carried by the link but not displayed.
 - Writes `docs/episode-N.html` (N≥1) and `docs/index.html` (embeds the episode-0 intro and links every episode).
-- For each `critique/episode-N.md`, writes `docs/critique-episode-N.html` with the same H1 and chapter headings but no video links (heading parity validated by `check_critiques.py`).
+- For each `critique/episode-N.md`, writes `docs/critique-episode-N.html` with the same H1 and chapter headings but no video links (heading parity validated by `check_critiques.py`). A critique whose md carries a citations section (`---` rule + numbered URL list) is rendered as a cited page: each `[cite: N]` marker becomes a superscript link into the «منابع» references section at the end.
 - Article↔critique cross-links: magnifier icons (`a.critique-link`) on article headings point to the critique, back arrows on critique headings point to the article; anchors pair `ch-{i}` / `critique-{i}`.
 - Consistent chrome: article H1 links to the video, header/footer link to the channel with an AI-generated disclaimer, GitHub ribbon, and a source link on episode pages.
 
