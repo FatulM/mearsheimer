@@ -243,9 +243,11 @@ The stage does these steps:
 
 The language model rewrites the body one time. The prompt tells the model to keep the H1 title and every chapter heading the same. The prompt tells the model to keep every `[cite: N]` marker the same. The prompt tells the model to change only the words.
 
-The reviewer uses `LLM_MODEL_AGENT_REVIEWER`. It compares the original body with the new body. It returns one JSON object: `{"ok": bool, "problems": [...], "revised": "..."}`. It repairs each problem with a small edit. It never simplifies the text again.
+The reviewer uses `LLM_MODEL_AGENT_REVIEWER`. It compares the original body with the new body. It returns one JSON object: `{"ok": bool, "problems": [...], "revised": "..."}`. It repairs each real problem with a small edit. It never simplifies the text again. It reports only the problems that stay after its edit. A faithful wording change is not a problem.
 
-Deterministic gates run before each reviewer pass and before the write. The gates check the structure and the citation markers. One gate compares every `[cite: N]` marker in the new body with the original body. The gate fails when a marker is added, removed, renumbered, or moved. This check catches a dropped duplicate citation that the other gates do not see. The loop stops when the reviewer reports `ok` and the gates pass. The loop also stops after `RESEARCHER_LANGUAGE_MAX_ROUNDS` passes.
+The corrected body always replaces the candidate body. A fix is never lost. The loop stops when the reviewer reports no problem and the gates pass. The loop also stops when the reviewer makes no change, or after `RESEARCHER_LANGUAGE_MAX_ROUNDS` passes.
+
+Deterministic gates run before each reviewer pass and before the write. The gates check the structure and the citation markers. One gate compares every `[cite: N]` marker in the new body with the original body. The gate fails when a marker is added, removed, renumbered, or moved. This check catches a dropped duplicate citation that the other gates do not see.
 
 If the loop does not stop cleanly, the stage writes `episode-N.failed.md` and exits non-zero. The run directory is `researcher/files/runs/<timestamp>-episode-N-language/`. It holds `trace.json`, `original.md`, `citations.md`, `simplified-body-0.md`, and `review-<k>.md`.
 

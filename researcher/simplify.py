@@ -6,8 +6,9 @@ Reads the cited critique produced by `main.py` from
 section, rewrites the body once with the dedicated Persian-writing model
 (`LLM_MODEL_AGENT_LANGUAGE`), then runs a reviewer/fixer loop
 (`LLM_MODEL_AGENT_REVIEWER`) that compares the original body with the
-simplified body and repairs every fidelity problem until it reports none. The
-original result file is left untouched; the simplified critique is written to
+simplified body, repairs every fidelity problem it finds, and reports only the
+problems that remain after its revision, until none remain. The original
+result file is left untouched; the simplified critique is written to
 `researcher/files/simplify/episode-N.md`.
 
 Only the single simplification pass uses `LLM_MODEL_AGENT_LANGUAGE`. The
@@ -314,31 +315,40 @@ def main(argv: list[str] | None = None) -> int:
         trace.log("gates", message=gate_text, problems=[str(p) for p in det])
         print(f"[ok] {gate_text}")
 
-        ok, review_problems, revised = run_language_reviewer(
+        ok, remaining, revised = run_language_reviewer(
             client, settings, toolbox, body, candidate_body, det
         )
-        combined = [str(p) for p in det] + review_problems
-        last_problems = combined
+        changed = bool(revised.strip()) and revised.strip() != candidate_body.strip()
+        if changed:
+            candidate_body = revised
+        final = repair_mechanical(join_citations(candidate_body, citations))
+        final_det = deterministic_problems(final, original, has_citations)
+        last_problems = [str(p) for p in final_det] + remaining
         trace.log(
             "language_review",
-            message=f"round {attempt}: ok={ok}, {len(combined)} problem(s)",
-            problems=combined,
+            message=(
+                f"round {attempt}: ok={ok}, {len(remaining)} remaining, "
+                f"{len(final_det)} deterministic, changed={changed}"
+            ),
+            problems=last_problems,
         )
-        if ok and not det:
+
+        if ok and not final_det:
             accepted = True
             print(f"[ok] review passed on round {attempt}")
             break
         if attempt == settings.max_language_rounds:
             print(f"[error] review still failing after {attempt} fix pass(es)")
             break
-        if not revised.strip():
-            print("[error] reviewer returned no revised body; cannot continue")
+        if not changed:
+            print(
+                "[error] reviewer made no change and problems remain; cannot converge"
+            )
             break
-        candidate_body = revised
-        (run_dir / f"review-{attempt + 1}.md").write_text(
-            repair_mechanical(join_citations(candidate_body, citations)), "utf-8"
+        (run_dir / f"review-{attempt + 1}.md").write_text(final, "utf-8")
+        print(
+            f"[ok] reviewer pass {attempt + 1} ({len(remaining)} remaining problem(s))"
         )
-        print(f"[ok] reviewer pass {attempt + 1} ({len(combined)} problem(s))")
 
     out_path = args.out or (SIMPLIFY_DIR / f"episode-{args.episode}.md")
     out_path.parent.mkdir(parents=True, exist_ok=True)

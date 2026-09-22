@@ -20,6 +20,8 @@ This is a language-simplification pass, not a summarization. Keep every chapter,
 
 Use only the text that you receive. Do not consult outside sources. Do not research, fact-check, or re-verify anything. Do not alter, soften, harden, or reverse any judgement or verdict.
 
+Do not change the facts. Keep every proper noun, place, date, number, percentage, and quoted phrase exactly as the input has it. Do not add a qualifier that the input does not have, and do not drop a qualifier that the input has. Do not add a claim, an example, or a reason of your own.
+
 Final cite markers are mandatory and non-negotiable. Keep every `[cite: N]` marker exactly as it appears: same English digits, same comma-separated numbers, same position relative to the sentence it supports. Do not add a marker, remove a marker, renumber a marker, or merge two markers. Do not introduce any other bracketed text.
 
 Chapter headings are mandatory and non-negotiable. Keep the H1 title and every `##` chapter heading byte-identical to the input. The timestamp and the Persian title must match the input exactly. Do not reword, translate, drop, merge, or reorder a heading. Your output must contain exactly as many `##` headings as the input, one per chapter, in the input's order. Never fold a chapter assessment into the overall assessment or into another chapter. Do not add an `##` heading before the overall assessment.
