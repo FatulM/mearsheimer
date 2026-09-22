@@ -27,7 +27,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from trace import RunTrace
@@ -151,58 +150,81 @@ def parse_review(raw: str) -> tuple[bool, list[str], str]:
     return ok, problems, revised
 
 
-def citation_markers(body: str) -> list[str]:
-    """Return the ordered `[cite: N]` markers of a body, exactly as written."""
-    return [match.group(0) for match in CITE_MARKER_RE.finditer(body)]
+def split_body_parts(body: str) -> list[str]:
+    """Split a critique body into parts: the general assessment and chapters.
+
+    The general assessment is everything before the first `##` heading (the H1
+    title and the assessment paragraphs). Each chapter part starts at its own
+    `## {mm:ss} - {TITLE}` heading and runs until the next heading. This
+    mirrors the section structure enforced by the heading-parity gate.
+    """
+    parts: list[str] = []
+    current: list[str] = []
+    for line in body.splitlines():
+        if line.startswith("## "):
+            if current:
+                parts.append("\n".join(current))
+            current = [line]
+        else:
+            current.append(line)
+    if current:
+        parts.append("\n".join(current))
+    return parts
+
+
+def part_citation_numbers(part: str) -> set[int]:
+    """Return the set of unique citation numbers mentioned in a body part."""
+    numbers: set[int] = set()
+    for match in CITE_MARKER_RE.finditer(part):
+        numbers.update(int(token.strip()) for token in match.group(1).split(","))
+    return numbers
+
+
+def _part_label(part: str, index: int) -> str:
+    first = part.splitlines()[0] if part.strip() else ""
+    if first.startswith("## "):
+        return f"chapter {index} ({first})"
+    return f"general assessment part {index}"
 
 
 def citation_fidelity(candidate_body: str, reference_body: str) -> list[Problem]:
-    """Mechanically compare citation markers against the original body.
+    """Mechanically check citation coverage per critique part.
 
-    The simplifier must not add, remove, renumber, or move a `[cite: N]`
-    marker. This compares the ordered marker sequence of the simplified body
-    with the original, so a dropped duplicate marker or a shifted marker is
-    caught even when the citations stay self-consistent.
+    The simplifier is allowed to merge `[cite: N]` markers or move them
+    slightly within a chapter, but must not drop a citation from a chapter or
+    move it into another part. For each part (the general assessment and every
+    chapter) the set of unique citation numbers must be identical before and
+    after the simplification, so `[cite: 1] ... [cite: 4] ... [cite: 1,2,3]`
+    matching `... [cite: 1,2,3,4]` is accepted for the same part.
     """
-    expected = citation_markers(reference_body)
-    actual = citation_markers(candidate_body)
-    if actual == expected:
-        return []
+    reference_parts = split_body_parts(reference_body)
+    candidate_parts = split_body_parts(candidate_body)
+    if len(reference_parts) != len(candidate_parts):
+        return [
+            Problem(
+                "citations",
+                f"part count changed during simplification: original has "
+                f"{len(reference_parts)} part(s), simplified has "
+                f"{len(candidate_parts)}",
+            )
+        ]
 
     problems: list[Problem] = []
-    expected_counts = Counter(expected)
-    actual_counts = Counter(actual)
-    for marker in dict.fromkeys(expected):
-        if actual_counts[marker] < expected_counts[marker]:
-            problems.append(
-                Problem(
-                    "citations",
-                    f"citation marker removed by simplification: {marker} "
-                    f"(original {expected_counts[marker]}, simplified "
-                    f"{actual_counts[marker]})",
-                )
+    for index, (original_part, simplified_part) in enumerate(
+        zip(reference_parts, candidate_parts), start=1
+    ):
+        expected = part_citation_numbers(original_part)
+        actual = part_citation_numbers(simplified_part)
+        if expected == actual:
+            continue
+        problems.append(
+            Problem(
+                "citations",
+                f"{_part_label(simplified_part, index)}: unique citation "
+                f"coverage changed (missing={sorted(expected - actual) or 'none'}, "
+                f"added={sorted(actual - expected) or 'none'})",
             )
-    for marker in dict.fromkeys(actual):
-        if actual_counts[marker] > expected_counts[marker]:
-            problems.append(
-                Problem(
-                    "citations",
-                    f"citation marker added by simplification: {marker} "
-                    f"(original {expected_counts[marker]}, simplified "
-                    f"{actual_counts[marker]})",
-                )
-            )
-    if not problems:
-        for position, (want, got) in enumerate(zip(expected, actual), start=1):
-            if want != got:
-                problems.append(
-                    Problem(
-                        "citations",
-                        f"citation marker {position} moved or reordered: "
-                        f"original={want} simplified={got}",
-                    )
-                )
-                break
+        )
     return problems
 
 

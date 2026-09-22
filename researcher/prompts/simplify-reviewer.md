@@ -21,7 +21,7 @@ Report a problem only when the meaning changed. These are the cases to report an
 - a judgement or verdict that the candidate reversed, softened, or hardened;
 - a fact that the candidate added and the original does not contain;
 - a heading that is not byte-identical to the original heading, or a change of heading count or order;
-- a `[cite: N]` marker that the candidate added, removed, renumbered, or moved away from the sentence it supports;
+- a `[cite: N]` marker that the candidate dropped, moved into another chapter or into the overall assessment, or moved away from the sentence it supports. Merging adjacent markers inside one chapter (for example `[cite: 1] [cite: 2]` into `[cite: 1,2]`) or sorting the numbers inside one marker is correct, not a problem;
 - a URL, a horizontal rule (`---`), a citations entry, a code fence, or any bracketed text other than `[cite: N]` that the candidate added;
 - English words or phrases that the candidate introduced and the original does not contain.
 

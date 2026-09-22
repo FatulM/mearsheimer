@@ -19,6 +19,9 @@ from sources import SourceRegistry, normalize_url
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+)$")
 HORIZONTAL_RULE_RE = re.compile(r"^\s*(?:-{3,}|\*{3,}|_{3,})\s*$")
 CITE_MARKER_RE = re.compile(r"\[cite:\s*(\d+(?:\s*,\s*\d+)*)\]")
+CITE_MERGE_RE = re.compile(
+    r"\[cite:\s*(\d+(?:\s*,\s*\d+)*)\]\s*\[cite:\s*(\d+(?:\s*,\s*\d+)*)\]"
+)
 ANY_BRACKET_RE = re.compile(r"\[[^\]]*\]")
 ENTRY_RE = re.compile(r"^(\d+)\.\s+(\S.*)$")
 URL_RE = re.compile(r"^https?://\S+$")
@@ -339,15 +342,44 @@ def _renumber_citations(text: str) -> str:
     return "\n".join([new_body, "---", *new_entries])
 
 
+def _canonical_cite(nums: str) -> str:
+    """Return the canonical ascending `[cite: N]` marker for a number list."""
+    numbers = sorted({int(part.strip()) for part in nums.split(",")})
+    return f"[cite: {','.join(str(n) for n in numbers)}]"
+
+
+def _normalize_cite_markers(text: str) -> str:
+    """Sort the numbers inside each `[cite: N]` marker and merge adjacent markers.
+
+    `[cite: 2,1]` becomes `[cite: 1,2]`, and a run of adjacent markers such as
+    `[cite: 1] [cite: 2,3]` becomes `[cite: 1,2,3]`. Only `[cite: N]` markers
+    are touched (both markers in a merge must be citation markers), only
+    whitespace separates the markers being merged, the set of referenced
+    numbers is preserved, and the merged marker keeps the text span that the
+    run of markers supported. Idempotent.
+    """
+    text = CITE_MARKER_RE.sub(lambda m: _canonical_cite(m.group(1)), text)
+    while True:
+        merged, count = CITE_MERGE_RE.subn(
+            lambda m: _canonical_cite(f"{m.group(1)},{m.group(2)}"), text
+        )
+        if count == 0:
+            return merged
+        text = merged
+
+
 def repair_mechanical(text: str) -> str:
     """Apply safe, deterministic repairs without an LLM.
 
     Fixes heading blank lines, citation numbering in first-reference order
-    (when bijective), and the trailing newline/blank line. Idempotent; any fix
-    that cannot be guaranteed safe is left for the reviewer.
+    (when bijective), citation-marker normalization (ascending numbers and
+    merging of adjacent markers), and the trailing newline/blank line.
+    Idempotent; any fix that cannot be guaranteed safe is left for the
+    reviewer.
     """
     text = _ensure_heading_blank_lines(text)
     text = _renumber_citations(text)
+    text = _normalize_cite_markers(text)
     stripped = text.rstrip("\n")
     return f"{stripped}\n\n" if stripped else text
 
