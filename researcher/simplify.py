@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from trace import RunTrace
@@ -45,7 +46,13 @@ from config import (
 )
 from sources import SourceRegistry
 from tools import Toolbox, TranscriptIndex
-from validate import HORIZONTAL_RULE_RE, repair_mechanical, validate_critique
+from validate import (
+    CITE_MARKER_RE,
+    HORIZONTAL_RULE_RE,
+    Problem,
+    repair_mechanical,
+    validate_critique,
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -143,11 +150,69 @@ def parse_review(raw: str) -> tuple[bool, list[str], str]:
     return ok, problems, revised
 
 
+def citation_markers(body: str) -> list[str]:
+    """Return the ordered `[cite: N]` markers of a body, exactly as written."""
+    return [match.group(0) for match in CITE_MARKER_RE.finditer(body)]
+
+
+def citation_fidelity(candidate_body: str, reference_body: str) -> list[Problem]:
+    """Mechanically compare citation markers against the original body.
+
+    The simplifier must not add, remove, renumber, or move a `[cite: N]`
+    marker. This compares the ordered marker sequence of the simplified body
+    with the original, so a dropped duplicate marker or a shifted marker is
+    caught even when the citations stay self-consistent.
+    """
+    expected = citation_markers(reference_body)
+    actual = citation_markers(candidate_body)
+    if actual == expected:
+        return []
+
+    problems: list[Problem] = []
+    expected_counts = Counter(expected)
+    actual_counts = Counter(actual)
+    for marker in dict.fromkeys(expected):
+        if actual_counts[marker] < expected_counts[marker]:
+            problems.append(
+                Problem(
+                    "citations",
+                    f"citation marker removed by simplification: {marker} "
+                    f"(original {expected_counts[marker]}, simplified "
+                    f"{actual_counts[marker]})",
+                )
+            )
+    for marker in dict.fromkeys(actual):
+        if actual_counts[marker] > expected_counts[marker]:
+            problems.append(
+                Problem(
+                    "citations",
+                    f"citation marker added by simplification: {marker} "
+                    f"(original {expected_counts[marker]}, simplified "
+                    f"{actual_counts[marker]})",
+                )
+            )
+    if not problems:
+        for position, (want, got) in enumerate(zip(expected, actual), start=1):
+            if want != got:
+                problems.append(
+                    Problem(
+                        "citations",
+                        f"citation marker {position} moved or reordered: "
+                        f"original={want} simplified={got}",
+                    )
+                )
+                break
+    return problems
+
+
 def deterministic_problems(text: str, reference: str, has_citations: bool) -> list:
     """Run the structural/citation gates, skipping citation gates when absent."""
     problems = validate_critique(text, reference, None)
     if not has_citations:
-        problems = [p for p in problems if p.code != "rule"]
+        return [p for p in problems if p.code != "rule"]
+    candidate_body, _ = split_citations(text)
+    reference_body, _ = split_citations(reference)
+    problems.extend(citation_fidelity(candidate_body, reference_body))
     return problems
 
 

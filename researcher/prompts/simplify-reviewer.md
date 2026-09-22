@@ -16,6 +16,7 @@ Do all of the following:
 - Fix each problem with a minimal, targeted edit. Keep the simplification simple and natural; do not re-complicate the wording. Do not rewrite a sentence that has no problem. Never change a judgement or verdict. Never add a new claim.
 - Preserve the exact structure: the H1 title and every `## {mm:ss} - {TITLE}` chapter heading must stay byte-identical to the original, in the same order and count.
 - Keep every `[cite: N]` marker exactly as it is in the candidate when the candidate is correct, and restore it from the original when your edit disturbed it.
+- When a deterministic problem reports a removed, added, renumbered, or moved `[cite: N]` marker, make the candidate's marker sequence match the original body exactly. Every occurrence matters, including a repeated marker on a second sentence.
 - Use English digits (0-9) for timestamps in headings and inside `[cite: N]` markers; use Persian numerals (۰-۹) for other digits in the body.
 - Leave one blank line after every heading. End the body with a blank line.
 
