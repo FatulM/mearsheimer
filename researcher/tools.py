@@ -49,7 +49,7 @@ BOILERPLATE_RE = re.compile(
     r"^(accept|agree|cookie|subscribe|sign in|log in|share|advertisement)\b",
     re.IGNORECASE,
 )
-BOT_BLOCK_STATUSES = {401, 403, 405, 429}
+BOT_BLOCK_STATUSES = {401, 403, 405, 406, 429}
 
 
 def _reachable(status: int) -> bool:
