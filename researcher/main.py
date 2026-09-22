@@ -31,6 +31,7 @@ from config import (
     RESEARCH,
     RESULT_DIR,
     REVIEWER,
+    ROOT,
     RUNS_DIR,
     Settings,
     check_endpoint,
@@ -96,6 +97,14 @@ def new_run_dir(episode: int, resume: str | None) -> Path:
         run_dir = RUNS_DIR / f"{stamp}-episode-{episode}"
     (run_dir / "notes").mkdir(parents=True, exist_ok=True)
     return run_dir
+
+
+def display_path(path: Path) -> str:
+    """Return a repo-root-relative display path (absolute fallback)."""
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 def chapter_map(content_text: str, transcript_text: str) -> str:
@@ -360,7 +369,7 @@ def main(argv: list[str] | None = None) -> int:
     notes_dir = run_dir / "notes"
     client = make_client(settings)
 
-    print(f"[ok] run directory: {run_dir}")
+    print(f"[ok] run directory: {display_path(run_dir)}")
     print(
         f"[ok] models: planner={settings.model(PLANNER)} lead={settings.model(LEAD)} "
         f"research={settings.model(RESEARCH)} reviewer={settings.model(REVIEWER)}"
@@ -447,12 +456,14 @@ def main(argv: list[str] | None = None) -> int:
         for problem in final_problems:
             print(f"[error] {problem}")
         trace.save()
-        print(f"[error] result not written; last draft saved to {failed_path}")
+        print(
+            f"[error] result not written; last draft saved to {display_path(failed_path)}"
+        )
         return 1
 
     out_path.write_text(current, "utf-8")
     trace.save()
-    print(f"[ok] wrote {out_path}")
+    print(f"[ok] wrote {display_path(out_path)}")
     _print_usage(trace)
     return 0
 
