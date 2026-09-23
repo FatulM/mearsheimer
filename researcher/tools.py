@@ -105,8 +105,13 @@ def _clean_text(text: str) -> str:
     return "\n".join(kept)
 
 
-def html_to_text(html: str) -> str:
-    """Extract main text from HTML, preferring trafilatura over BeautifulSoup."""
+def html_to_text(html: str, soup: BeautifulSoup | None = None) -> str:
+    """Extract main text from HTML, preferring trafilatura over BeautifulSoup.
+
+    A pre-parsed `soup` is reused for the fallback extraction so a page is
+    never parsed twice; it is used only when the trafilatura fast path does
+    not apply.
+    """
     if trafilatura is not None:
         extracted = None
         with contextlib.suppress(Exception):
@@ -116,7 +121,8 @@ def html_to_text(html: str) -> str:
         if extracted and len(extracted) > 200:
             return _clean_text(extracted)
 
-    soup = BeautifulSoup(html, "lxml")
+    if soup is None:
+        soup = BeautifulSoup(html, "lxml")
     for tag in soup(BLOCK_TAGS):
         tag.decompose()
     container = soup.find("article") or soup.find("main") or soup.body or soup
@@ -406,10 +412,11 @@ class Toolbox:
                 "text": truncated_text,
                 "truncated": truncated,
             }
-        text = html_to_text(response.text)
+        soup = BeautifulSoup(response.text, "lxml")
         title = ""
         with contextlib.suppress(Exception):
-            title = BeautifulSoup(response.text, "lxml").title.string or ""
+            title = soup.title.string or ""
+        text = html_to_text(response.text, soup=soup)
         truncated_text, truncated = _truncate_tokens(text, FETCH_MAX_TOKENS)
         self.registry.mark_fetched(url, ok=True, status=status, title=title.strip())
         return {

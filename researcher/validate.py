@@ -27,6 +27,10 @@ ENTRY_RE = re.compile(r"^(\d+)\.\s+(\S.*)$")
 URL_RE = re.compile(r"^https?://\S+$")
 
 EXPECTED_CITE = "[cite: N]"
+NO_CLAIMS_RE = re.compile(
+    r"(?:هیچ\s+)?ادعا(?:ی|های|یی)\s+قابل(?:ِ)?\s+راستی\u200c?آزمایی\s+"
+    r"مستقل(?:ی)?(?:\s+وجود)?\s+ندارد"
+)
 
 
 @dataclass
@@ -167,6 +171,45 @@ def _parse_entries(cite_lines: list[str], problems: list[Problem]) -> dict[int, 
     return entries
 
 
+def split_body_parts(text: str) -> list[str]:
+    """Split a critique body into parts: the overall assessment and chapters.
+
+    The overall assessment is everything before the first `##` heading. Each
+    chapter part starts at its own `## {mm:ss} - {TITLE}` heading and runs
+    until the next heading.
+    """
+    parts: list[str] = []
+    current: list[str] = []
+    for line in text.splitlines():
+        if line.startswith("## "):
+            if current:
+                parts.append("\n".join(current))
+            current = [line]
+        else:
+            current.append(line)
+    if current:
+        parts.append("\n".join(current))
+    return parts
+
+
+def _check_per_chapter_citations(body: str, problems: list[Problem]) -> None:
+    """Require at least one `[cite: N]` marker in every research-bearing chapter.
+
+    A chapter with no verifiable claims passes via the no-claims exemption
+    phrase. The overall assessment part (before the first `##` heading) is
+    exempt.
+    """
+    parts = split_body_parts(body)
+    for index, part in enumerate(parts[1:], start=1):
+        if CITE_MARKER_RE.search(part):
+            continue
+        if NO_CLAIMS_RE.search(part):
+            continue
+        problems.append(
+            Problem("citations", f"chapter {index} has no {EXPECTED_CITE} marker")
+        )
+
+
 def _check_citations(
     body: str,
     entries: dict[int, str],
@@ -191,6 +234,7 @@ def _check_citations(
 
     if not referenced:
         problems.append(Problem("citations", "no [cite: N] markers found in the body"))
+    _check_per_chapter_citations(body, problems)
 
     for number in referenced:
         if number not in entries:
@@ -238,11 +282,12 @@ def _check_citations(
                 )
             )
             continue
-        if not source.citable:
+        if not (source.fetched and source.alive is not False):
             problems.append(
                 Problem(
                     "provenance",
-                    f"entry {number} URL is not reachable: {normalize_url(url)}",
+                    f"entry {number} URL was not fetched during this run: "
+                    f"{normalize_url(url)}",
                 )
             )
         if require_alive and source.alive is False:
@@ -368,17 +413,19 @@ def _normalize_cite_markers(text: str) -> str:
         text = merged
 
 
-def repair_mechanical(text: str) -> str:
+def repair_mechanical(text: str, *, renumber: bool = True) -> str:
     """Apply safe, deterministic repairs without an LLM.
 
     Fixes heading blank lines, citation numbering in first-reference order
     (when bijective), citation-marker normalization (ascending numbers and
     merging of adjacent markers), and the trailing newline/blank line.
     Idempotent; any fix that cannot be guaranteed safe is left for the
-    reviewer.
+    reviewer. Pass `renumber=False` to keep the citations section as written
+    (the simplify stage must never rewrite the numbering).
     """
     text = _ensure_heading_blank_lines(text)
-    text = _renumber_citations(text)
+    if renumber:
+        text = _renumber_citations(text)
     text = _normalize_cite_markers(text)
     stripped = text.rstrip("\n")
     return f"{stripped}\n\n" if stripped else text

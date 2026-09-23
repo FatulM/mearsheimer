@@ -95,7 +95,7 @@ Read the modules in this order. Each module builds on the module before it. For 
 
 Read `main.py` from start to finish before you read anything else. It is the only module that imports from all the others. It shows how the pieces connect.
 
-- `parse_args` handles the CLI. Note that `--resume RUN_ID` reuses an existing run directory.
+- `parse_args` handles the CLI. Note that `--run-id RUN_ID` reuses an existing run directory.
 - `read_episode` reads the inputs. The inputs are the Persian post and the processed transcript.
 - `new_run_dir` creates a directory for each run. The directory is `files/runs/<YYMMDD-HHMMSS>-episode-N/`.
 - `chapter_map` and `parse_plan` handle the planner output. The planner output is JSON. If the parsing fails, the app uses a single `general` topic instead.
@@ -177,7 +177,7 @@ Focus questions:
 The **source registry** stops the model from inventing sources.
 
 - `normalize_url` strips fragments and trailing slashes. This makes URL lookups consistent.
-- `Source` has the fields `alive: bool|None`, `http_status`, `fetched`, and `origin`. The property `citable` equals `alive is not False`. So an unchecked source (`alive is None`) is still citable in `_check_citations` unless `require_alive` is set. A source with `alive is False` is not citable. Understand both paths.
+- `Source` has the fields `alive: bool|None`, `http_status`, `fetched`, and `origin`. A cited URL is valid only when the source content was actually retrieved and the source is not known dead: the gate requires `fetched is True` and `alive is not False`. An unchecked source (`alive is None`, never fetched) is rejected by the provenance gate; a source with `alive is False` is rejected too. Understand both paths.
 - `SourceRegistry` is thread-safe. It uses one lock. Research subagents run in parallel against the same registry.
 - `SourceRegistry` provides `add`, `mark_fetched`, `mark_alive`, `get`, `has`, `all`, and `save`.
 
@@ -207,7 +207,7 @@ This module defines when a critique is done.
 - `_check_headings_match` checks the H1 and the ordered `## {mm:ss} - {TITLE}` list. They must be byte-identical to the source content. None can be dropped, added, or rewritten.
 - `_check_rule` requires exactly one horizontal rule. That rule is the `---` before the citations.
 - `_parse_entries` parses each entry. An entry is `{N}. {Persian} — {title (outlet)} — {URL}`. It has exactly two ` — ` separators, so three fields. The last field must be a real URL.
-- `_check_citations` checks the body. The body can contain only `[cite: N]` brackets. Every cited number maps to an entry. Every entry is referenced. The entries are numbered `1..N`. The numbering follows first-reference order. The URL must be in the registry, which is the provenance check. When asked, `alive is not False` must hold, which is the liveness check.
+- `_check_citations` checks the body. The body can contain only `[cite: N]` brackets. Every cited number maps to an entry. Every entry is referenced. The entries are numbered `1..N`. The numbering follows first-reference order. Every chapter that presents research findings carries at least one `[cite: N]` marker; a chapter with no verifiable claims passes via the no-claims exemption phrase «ادعای قابل راستی‌آزمایی مستقلی ندارد». The URL must have been fetched during the run — the provenance check requires `fetched is True` and `alive is not False`. When asked, `alive must not be False`, which is the liveness check.
 - `repair_mechanical` applies deterministic fixes. It adds blank lines after headings. It renumbers citations to first-reference order. It does this only when the mapping is bijective, so the cite set equals the entry set. It adds the trailing blank line. Anything ambiguous, such as wrong em-dash counts, is left for the reviewer.
 - `cited_urls` returns every URL in the citations section. The liveness check uses these URLs.
 - Run a standalone check with `python3 researcher/validate.py <critique.md> <content.md>`.
@@ -243,7 +243,7 @@ The stage does these steps:
 
 The language model rewrites the body one time. The prompt tells the model to keep the H1 title and every chapter heading the same. The prompt tells the model to keep every citation number inside its own chapter. A chapter may merge adjacent markers into one. The prompt tells the model to change only the words.
 
-The reviewer uses `LLM_MODEL_AGENT_REVIEWER`. It compares the original body with the new body. It returns one JSON object: `{"ok": bool, "problems": [...], "revised": "..."}`. It repairs each real problem with a small edit. It never simplifies the text again. It reports only the problems that stay after its edit. A faithful wording change is not a problem.
+The reviewer uses `LLM_MODEL_AGENT_REVIEWER`. It compares the original body with the new body. It returns one JSON object: `{"ok": bool, "problems": [...], "revised": "..."}`. It repairs each real problem with a small edit. It never simplifies the text again. It reports only the problems that stay after its edit. A faithful wording change is not a problem. Each round after the first carries the previous round's remaining problems back to the reviewer as a re-verify list, so it checks only the items that still appear in the current candidate instead of re-auditing the whole text from scratch. The result is written only when `ok` is `true` and the deterministic gates pass.
 
 The corrected body always replaces the candidate body. A fix is never lost. The loop stops when the reviewer reports no problem and the gates pass. The loop also stops when the reviewer makes no change, or after `RESEARCHER_LANGUAGE_MAX_ROUNDS` passes.
 
@@ -264,7 +264,7 @@ Focus questions:
 Each run creates a directory `files/runs/<timestamp>-episode-N/`:
 
 ```
-├── cli.log            # stdout/stderr if you redirect (verbose trace echoes)
+├── cli.log            # stdout/stderr, but only if you redirect; not created otherwise
 ├── plan.json          # planner output: topics + coverage
 ├── trace.json         # full event log + per-agent token usage
 ├── sources.json       # the provenance registry (asdict of every Source)
@@ -277,7 +277,7 @@ Each run creates a directory `files/runs/<timestamp>-episode-N/`:
 
 Reading order for a finished run:
 
-1. Read `cli.log`. It is the narrative. It shows the planned topics, warnings, gate rounds, total tokens, and result path.
+1. Read `cli.log` when present. It exists only when you redirect stdout/stderr, and it is the narrative: it shows the planned topics, warnings, gate rounds, total tokens, and result path.
 2. Read `trace.json`. Use these filters:
 
    - `usage` shows the per-agent call and token counts. Watch for a reviewer that uses many tokens.
@@ -296,7 +296,7 @@ Reading order for a finished run:
 2. Check the cause. The citations in `draft.md` were not in first-reference order. This caused one gate problem. The reviewer renumbered the list and the markers consistently. The `trace.json` records 7 reviewer LLM calls and about 414k tokens. This was the known scope-drift case. Now `repair_mechanical` and `reviewer.md` prevent it.
 3. The `trace.json` also shows 32 `tool_error` events. There are 13 `web_search` errors and 19 `fetch_url` errors. These were transient provider failures. They motivated the retry logic in `tools.py`.
 4. The `sources.json` shows the `origin` for each cited URL. A later standalone `validate.py` check passes all gates.
-5. Compare this with the episode-3 run (`20260921-074427-episode-3`). It reports `gates passed on round 0` with zero reviewer passes. The mechanical repair fixed the ordering deterministically. But its `trace.json` shows about 161 `tool_error` events. The `web_search` tool returned `No results found.` (see section 9). The subagents used best-guess URLs with `fetch_url` instead. The critique became heavy with Wikipedia sources. The run now works again after the backend fix.
+5. Compare this with the episode-3 run. Run directories use names in the form `<timestamp>-episode-<n>` (for example `20260922-045112-episode-3`). That run reports `gates passed on round 0` with zero reviewer passes. The mechanical repair fixed the ordering deterministically. But its `trace.json` shows about 161 `tool_error` events. The `web_search` tool returned `No results found.` (see section 9). The subagents used best-guess URLs with `fetch_url` instead. The critique became heavy with Wikipedia sources. The run now works again after the backend fix.
 
 ---
 
@@ -323,7 +323,7 @@ EOF
 Common confusions:
 
 - A `tool_call` event plus a `tool_result` event means success. A `tool_error` event means failure. The `tool_call` for a failed call is not logged.
-- The value `ok: null` in `url_alive` or the registry means `unknown`, not dead. It can be a network error or a bot block. The final gate fails only when `alive is False`.
+- The value `ok: null` in `url_alive` or the registry means `unknown`, not dead. It can be a network error or a bot block. A URL still fails the provenance gate when its content was never fetched with `fetch_url`, and it fails the final liveness pass when `alive is False`.
 - The entry numbers follow the first reference in the body, not the numerical order. So `1,3,2,4,8,7,...` is valid.
 
 ---

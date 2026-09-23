@@ -29,7 +29,25 @@ Fix each problem with a minimal, targeted edit. Keep the simple wording of the c
 
 Preserve the exact structure: the H1 title and every `## {mm:ss} - {TITLE}` chapter heading must stay byte-identical to the original, in the same order and count. Use English digits (0-9) for timestamps in headings and inside `[cite: N]` markers; use Persian numerals (۰-۹) for other digits in the body. Leave one blank line after every heading. End the body with a blank line.
 
-After your correction, report only the problems that REMAIN. When you fix every problem, the `"problems"` list is empty and `"ok"` is `true`. Do not list a problem that you fixed. When one problem cannot be fixed, keep it in `"problems"` and set `"ok"` to `false`.
+After your correction, report only the problems that REMAIN. The `"problems"` list holds only the problems that are still wrong in the text you return in `"revised"`. When you fix every problem, the `"problems"` list is empty and `"ok"` is `true`. Do not list a problem that you fixed. When one problem cannot be fixed, keep it in `"problems"` and set `"ok"` to `false`.
+
+When the user message contains a `# Previously reported problems to re-verify` section, check each listed item against the current candidate text and report only the items that still appear in the text. An item you already corrected inside `"revised"` no longer appears in the returned text, so it is not reported.
+
+Worked example: the previous round reported "the candidate changed a number, «۳۷ درصد» became «۳۵ درصد»". You fix the candidate inside `"revised"` so it again reads «۳۷ درصد». Because the corrected text no longer contains the problem, the `"problems"` list is empty:
+
+```json
+{
+  "ok": true,
+  "problems": [],
+  "revised": "# {TITLE IN PERSIAN}\n\n{body, now with «۳۷ درصد»}\n"
+}
+```
+
+Hard rules:
+- The `"problems"` list holds only the problems that are still wrong in the text you return in `"revised"`.
+- Set `"ok"` to `true` when the text you return is faithful to the original body and has no remaining problem, and set `"ok"` to `false` otherwise.
+- Never re-simplify the text: make minimal, targeted edits only, and keep the simple wording of the candidate.
+- A faithful wording change is never a problem.
 
 Output ONLY a single JSON object. Do not add prose, explanations, comments, or code fences around it. Use this exact shape:
 

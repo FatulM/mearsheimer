@@ -17,7 +17,7 @@ from config import Settings
 from openai import APIConnectionError, APIStatusError, OpenAI, RateLimitError
 from tenacity import (
     retry,
-    retry_if_exception_type,
+    retry_if_exception,
     stop_after_attempt,
     wait_exponential,
 )
@@ -25,7 +25,20 @@ from tools import Toolbox
 
 FENCE_RE = re.compile(r"^\s*```(?:\w*)\s*$", re.MULTILINE)
 
-RETRYABLE = (APIConnectionError, RateLimitError, APIStatusError)
+
+def _should_retry(exc: BaseException) -> bool:
+    """Return whether a failed LLM call is worth retrying (transient only).
+
+    Permanent client errors (HTTP 400, 401, ...) never recover from a retry,
+    so they fail fast instead of burning the backoff budget.
+    """
+    if isinstance(exc, RateLimitError):
+        return True
+    if isinstance(exc, APIConnectionError):
+        return True
+    if isinstance(exc, APIStatusError):
+        return exc.status_code == 429 or exc.status_code >= 500
+    return False
 
 
 def make_client(settings: Settings) -> OpenAI:
@@ -39,7 +52,7 @@ def strip_fences(text: str) -> str:
 
 
 @retry(
-    retry=retry_if_exception_type(RETRYABLE),
+    retry=retry_if_exception(_should_retry),
     stop=stop_after_attempt(4),
     wait=wait_exponential(multiplier=2, min=2, max=30),
     reraise=True,

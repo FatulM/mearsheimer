@@ -43,7 +43,7 @@ source .venv/bin/activate
 python3 researcher/main.py 2
 python3 researcher/main.py 2 --verbose --max-review-rounds 2
 python3 researcher/main.py 2 --out /tmp/episode-2.md
-python3 researcher/main.py 2 --resume 20260921-101500-episode-2
+python3 researcher/main.py 2 --run-id 20260921-101500-episode-2
 ```
 
 Inputs are `content/episode-N.md` (the Persian post) and `processed/episode-N.md` (the English transcript), both for episode `N >= 1`. The default output is `researcher/files/result/episode-N.md`.
@@ -76,7 +76,8 @@ The result is written only when every gate passes:
 - every `## {mm:ss} - {TITLE}` heading byte-identical, in order, with none dropped;
 - blank line after every heading, exactly one `---` before the citations, file ends with a blank line;
 - every `[cite: N]` maps to an entry; every entry is referenced; entries numbered sequentially in first-reference order;
-- every cited URL was actually retrieved during the run (provenance) and is reachable (liveness);
+- every chapter that presents research findings carries at least one `[cite: N]` marker; a chapter with no verifiable claims passes only when it uses the no-claims exemption phrase;
+- every cited URL was actually fetched with `fetch_url` during the run (so its content was retrieved), was reachable, and passed the liveness check;
 - no bracketed markers other than `[cite: N]`.
 
 Before every gate check, `repair_mechanical` applies safe deterministic fixes — blank lines after headings, citation entries renumbered into first-reference order (when the mapping is bijective), and a trailing blank line. Anything that cannot be fixed safely is left for the reviewer.
@@ -99,9 +100,9 @@ researcher/files/
 
 ## Language simplification (`simplify.py`)
 
-`python3 researcher/simplify.py N [--verbose] [--max-rounds K] [--out PATH] [--resume RUN_ID]` is a separate, second-stage pass that runs after `main.py`. It makes the finished Persian critique easier to read without changing what it says.
+`python3 researcher/simplify.py N [--verbose] [--max-rounds K] [--out PATH] [--run-id RUN_ID]` is a separate, second-stage pass that runs after `main.py`. It makes the finished Persian critique easier to read without changing what it says.
 
-It reads the cited critique from `researcher/files/result/episode-N.md`. The original file is never modified. It splits the critique at the horizontal rule, keeps the citations section aside verbatim, and rewrites only the body once with `LLM_MODEL_AGENT_LANGUAGE` — the Persian-writing model (for example `gemini-3.8-flash`). A reviewer/fixer loop (`LLM_MODEL_AGENT_REVIEWER`) then compares the original body with the simplified body and repairs every fidelity problem it finds: dropped, added, or altered claims, numbers, names, and verdicts; changed headings; and changed `[cite: N]` markers. It reports only the problems that remain after its own revision, and it accepts a faithful wording change without flagging it. The corrected body is always kept, so a fix is never discarded. The loop stops when the reviewer reports no remaining problem and the deterministic gates pass, when the reviewer can no longer change the text, or when `RESEARCHER_LANGUAGE_MAX_ROUNDS` passes are used.
+It reads the cited critique from `researcher/files/result/episode-N.md`. The original file is never modified. It splits the critique at the horizontal rule, keeps the citations section aside verbatim, and rewrites only the body once with `LLM_MODEL_AGENT_LANGUAGE` — the Persian-writing model (for example `gemini-3.8-flash`). A reviewer/fixer loop (`LLM_MODEL_AGENT_REVIEWER`) then compares the original body with the simplified body and repairs every fidelity problem it finds: dropped, added, or altered claims, numbers, names, and verdicts; changed headings; and changed `[cite: N]` markers. It reports only the problems that remain after its own revision, and it accepts a faithful wording change without flagging it. Each round after the first carries the previous round's remaining problems back to the reviewer as a re-verify list, so it checks only the items that still appear in the current candidate text instead of re-auditing from scratch. The corrected body is always kept, so a fix is never discarded. The reviewer loop keeps the `ok: true` veto: the result is written only when the reviewer reports `ok: true`, the deterministic gates pass, the reviewer can no longer change the text, or `RESEARCHER_LANGUAGE_MAX_ROUNDS` passes are used.
 
 One simplification pass only. The reviewer fixes the simplified text; it never re-simplifies it. Deterministic gates run before every reviewer pass and before the write: heading parity with the original result, structure, one `---`, citation self-consistency, and per-part citation coverage. Before the gates run, markers are mechanically normalized: numbers inside each `[cite: N]` marker are sorted ascending, and adjacent markers such as `[cite: 1] [cite: 2]` are merged into `[cite: 1,2]`. For each part (the overall assessment and every chapter) the set of unique citation numbers must then match the original, so the simplified text may merge or slightly move markers inside a chapter, but a citation dropped from a chapter or moved into another chapter fails the run. A broken structure is never written as a success.
 
@@ -123,7 +124,7 @@ source .venv/bin/activate
 python3 researcher/simplify.py 2
 python3 researcher/simplify.py 2 --verbose --max-rounds 2
 python3 researcher/simplify.py 2 --out /tmp/episode-2.simple.md
-python3 researcher/simplify.py 2 --resume 20260922-101500-episode-2-language
+python3 researcher/simplify.py 2 --run-id 20260922-101500-episode-2-language
 ```
 
 ## Validating the deterministic gates standalone

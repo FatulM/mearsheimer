@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -31,7 +32,6 @@ from config import (
     RESEARCH,
     RESULT_DIR,
     REVIEWER,
-    ROOT,
     RUNS_DIR,
     Settings,
     check_endpoint,
@@ -45,6 +45,7 @@ from tools import (
     Toolbox,
     TranscriptIndex,
 )
+from util import display_path, print_usage
 from validate import cited_urls, extract_headings, repair_mechanical, validate_critique
 
 
@@ -68,10 +69,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--max-review-rounds", type=int, help="maximum reviewer/fixer passes"
     )
     parser.add_argument(
-        "--resume",
+        "--run-id",
+        dest="run_id",
         metavar="RUN_ID",
         help="reuse an existing run directory under files/runs/",
     )
+    parser.add_argument("--resume", dest="run_id", help=argparse.SUPPRESS)
     parser.add_argument(
         "--verbose", action="store_true", help="print every trace event"
     )
@@ -88,23 +91,19 @@ def read_episode(n: int) -> tuple[str, str]:
     return content_path.read_text("utf-8"), transcript_path.read_text("utf-8")
 
 
-def new_run_dir(episode: int, resume: str | None) -> Path:
-    """Create (or reuse) the run directory for this episode."""
-    if resume:
-        run_dir = RUNS_DIR / resume
+def new_run_dir(episode: int, run_id: str | None) -> Path:
+    """Create (or reuse) the run directory for this episode.
+
+    `run_id` names an existing run directory under `files/runs/`; when absent,
+    a fresh `<timestamp>-episode-<n>` directory is created.
+    """
+    if run_id:
+        run_dir = RUNS_DIR / run_id
     else:
         stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
         run_dir = RUNS_DIR / f"{stamp}-episode-{episode}"
     (run_dir / "notes").mkdir(parents=True, exist_ok=True)
     return run_dir
-
-
-def display_path(path: Path) -> str:
-    """Return a repo-root-relative display path (absolute fallback)."""
-    try:
-        return str(path.resolve().relative_to(ROOT))
-    except ValueError:
-        return str(path)
 
 
 def chapter_map(content_text: str, transcript_text: str) -> str:
@@ -145,6 +144,82 @@ def parse_plan(raw: str, max_topics: int) -> dict:
     }
 
 
+TOPIC_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+CHAPTER_STAMP_RE = re.compile(r"^##\s+(\d{1,2}:\d{2})\s*-")
+
+
+def _normalize_stamp(ts: str) -> str:
+    """Canonicalize a `m:ss` timestamp for coverage comparison."""
+    ts = ts.strip()
+    if ":" not in ts:
+        return ts
+    minute, _, second = ts.partition(":")
+    try:
+        return f"{int(minute)}:{int(second):02d}"
+    except ValueError:
+        return ts
+
+
+def ensure_plan_coverage(plan: dict, content_text: str, trace: RunTrace) -> None:
+    """Ensure every content chapter is covered by a topic and ids are safe.
+
+    When a content chapter timestamp appears in no topic's `chapters` list,
+    the uncovered timestamps are appended to a `general` topic (created when
+    missing). Topic ids that would be unsafe in an agent name or file name are
+    renamed to `topic-{i}`. The fallback plan is left untouched. The plan is
+    mutated in place.
+    """
+    if plan.get("_fallback"):
+        return
+    content_stamps: list[str] = []
+    for raw in (h[1] for h in extract_headings(content_text) if h[0] == 2):
+        match = CHAPTER_STAMP_RE.match(raw)
+        if match:
+            content_stamps.append(match.group(1))
+    covered: set[str] = set()
+    for topic in plan.get("topics", []):
+        for chapter in topic.get("chapters", []):
+            covered.add(_normalize_stamp(str(chapter)))
+
+    seen: set[str] = set()
+    uncovered = [
+        stamp
+        for stamp in content_stamps
+        if _normalize_stamp(stamp) not in covered
+        and not (stamp in seen or seen.add(stamp))
+    ]
+    if uncovered:
+        general = next(
+            (t for t in plan.get("topics", []) if t.get("id") == "general"), None
+        )
+        if general is None:
+            general = {
+                "id": "general",
+                "description": "Fact-check the claims in the uncovered chapters",
+                "chapters": [],
+                "queries": [],
+            }
+            plan.setdefault("topics", []).append(general)
+        for stamp in uncovered:
+            if stamp not in general["chapters"]:
+                general["chapters"].append(stamp)
+        trace.log(
+            "plan",
+            message="uncovered chapters added to the general topic",
+            chapters=uncovered,
+        )
+        print(f"[warn] chapters without a research topic: {', '.join(uncovered)}")
+
+    for i, topic in enumerate(plan.get("topics", []), start=1):
+        if not TOPIC_ID_RE.fullmatch(topic.get("id", "")):
+            old = topic["id"]
+            topic["id"] = f"topic-{i}"
+            trace.log(
+                "plan",
+                message=f"renamed topic id {old!r} to {topic['id']!r}",
+            )
+
+
 def run_planner(
     client,
     settings: Settings,
@@ -170,6 +245,7 @@ def run_planner(
         trace=toolbox.trace,
     )
     plan = parse_plan(raw, settings.max_topics)
+    ensure_plan_coverage(plan, content_text, toolbox.trace)
     (run_dir / "plan.json").write_text(
         json.dumps(plan, ensure_ascii=False, indent=2) + "\n", "utf-8"
     )
@@ -244,31 +320,69 @@ def run_research(
 
 
 def _topic_transcript(transcript: TranscriptIndex, topic: dict) -> str:
-    """Return the transcript chapters relevant to a topic."""
+    """Return the transcript chapters relevant to a topic.
+
+    The block is capped at `TOPIC_TRANSCRIPT_MAX_CHARS`; truncation always
+    happens on a chapter boundary and a closing note marks the cut.
+    """
     chapters = []
     for timestamp in topic.get("chapters", []):
         chapters.extend(transcript.find(str(timestamp), limit=1))
     if not chapters:
         chapters = transcript.chapters
     seen: set[str] = set()
-    lines: list[str] = []
+    blocks: list[str] = []
     for chapter in chapters:
         if chapter.timestamp in seen:
             continue
         seen.add(chapter.timestamp)
-        lines.append(f"## {chapter.timestamp} - {chapter.title}\n\n{chapter.body}")
-    return "\n\n".join(lines)
+        blocks.append(f"## {chapter.timestamp} - {chapter.title}\n\n{chapter.body}")
+    if (
+        sum(len(block) for block in blocks) + 2 * (len(blocks) - 1)
+        <= TOPIC_TRANSCRIPT_MAX_CHARS
+    ):
+        return "\n\n".join(blocks)
+
+    kept: list[str] = []
+    length = 0
+    for block in blocks:
+        cost = len(block) + (2 if kept else 0)
+        if length and length + cost > TOPIC_TRANSCRIPT_MAX_CHARS:
+            break
+        kept.append(block)
+        length += cost
+    kept.append(
+        "(transcript excerpt truncated to the research prompt budget; "
+        "use read_transcript to fetch a specific chapter)"
+    )
+    return "\n\n".join(kept)
+
+
+TOPIC_TRANSCRIPT_MAX_CHARS = 10000
 
 
 def compile_notes(notes_dir: Path, results: list[dict]) -> str:
-    """Combine subagent notes into a single block for the writer."""
+    """Combine subagent notes into a single block for the writer.
+
+    For each topic, the notes are taken from the `note_write` scratch file
+    (`notes/{topic_id}.md`) when it exists, falling back to the agent's final
+    reply (`notes/{topic_id}.notes.md`) and finally to the returned value.
+    """
     blocks: list[str] = []
     for item in results:
-        block = (
-            item["notes"]
-            if item["ok"]
-            else f"(topic {item['id']} could not be researched: {item['notes']})"
-        )
+        if item["ok"]:
+            scratch = notes_dir / f"{item['id']}.md"
+            if scratch.exists():
+                block = scratch.read_text("utf-8").strip()
+            else:
+                reply = notes_dir / f"{item['id']}.notes.md"
+                block = (
+                    reply.read_text("utf-8").strip()
+                    if reply.exists()
+                    else item["notes"]
+                )
+        else:
+            block = f"(topic {item['id']} could not be researched: {item['notes']})"
         blocks.append(f"## Notes for topic: {item['id']}\n\n{block}")
     return "\n\n".join(blocks) if blocks else "(no research notes)"
 
@@ -362,7 +476,7 @@ def main(argv: list[str] | None = None) -> int:
         max_review_rounds=args.max_review_rounds,
     )
     content_text, transcript_text = read_episode(args.episode)
-    run_dir = new_run_dir(args.episode, args.resume)
+    run_dir = new_run_dir(args.episode, args.run_id)
     trace = RunTrace(run_dir=run_dir, verbose=args.verbose)
     registry = SourceRegistry()
     transcript = TranscriptIndex(transcript_text)
@@ -464,15 +578,8 @@ def main(argv: list[str] | None = None) -> int:
     out_path.write_text(current, "utf-8")
     trace.save()
     print(f"[ok] wrote {display_path(out_path)}")
-    _print_usage(trace)
+    print_usage(trace)
     return 0
-
-
-def _print_usage(trace: RunTrace) -> None:
-    total = sum(entry["total"] for entry in trace.usage.values())
-    print(f"[ok] total tokens: {total}")
-    for agent, entry in sorted(trace.usage.items()):
-        print(f"      {agent}: {entry['calls']} call(s), {entry['total']} tokens")
 
 
 if __name__ == "__main__":

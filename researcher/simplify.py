@@ -19,7 +19,7 @@ Usage:
     python3 researcher/simplify.py 2
     python3 researcher/simplify.py 2 --verbose --max-rounds 2
     python3 researcher/simplify.py 2 --out /tmp/episode-2.simple.md
-    python3 researcher/simplify.py 2 --resume 20260922-101500-episode-2-language
+    python3 researcher/simplify.py 2 --run-id 20260922-101500-episode-2-language
 """
 
 from __future__ import annotations
@@ -37,7 +37,6 @@ from config import (
     PROMPTS_DIR,
     RESULT_DIR,
     REVIEWER,
-    ROOT,
     RUNS_DIR,
     SIMPLIFY_DIR,
     Settings,
@@ -46,11 +45,13 @@ from config import (
 )
 from sources import SourceRegistry
 from tools import Toolbox, TranscriptIndex
+from util import display_path, print_usage
 from validate import (
     CITE_MARKER_RE,
     HORIZONTAL_RULE_RE,
     Problem,
     repair_mechanical,
+    split_body_parts,
     validate_critique,
 )
 
@@ -67,10 +68,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--max-rounds", type=int, help="maximum reviewer/fixer passes")
     parser.add_argument(
-        "--resume",
+        "--run-id",
+        dest="run_id",
         metavar="RUN_ID",
         help="reuse an existing run directory under files/runs/",
     )
+    parser.add_argument("--resume", dest="run_id", help=argparse.SUPPRESS)
     parser.add_argument(
         "--verbose", action="store_true", help="print every trace event"
     )
@@ -85,27 +88,21 @@ def read_result(n: int) -> str:
     return path.read_text("utf-8")
 
 
-def new_run_dir(episode: int, resume: str | None) -> Path:
+def new_run_dir(episode: int, run_id: str | None) -> Path:
     """Create (or reuse) the language-run directory for this episode.
 
-    The timestamp format matches `main.py`; the suffix marks the run as the
+    `run_id` names an existing run directory under `files/runs/`; when absent,
+    a fresh `<timestamp>-episode-<n>-language` directory is created. The
+    timestamp format matches `main.py`; the suffix marks the run as the
     language-simplification stage.
     """
-    if resume:
-        run_dir = RUNS_DIR / resume
+    if run_id:
+        run_dir = RUNS_DIR / run_id
     else:
         stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
         run_dir = RUNS_DIR / f"{stamp}-episode-{episode}-language"
     run_dir.mkdir(parents=True, exist_ok=True)
     return run_dir
-
-
-def display_path(path: Path) -> str:
-    """Return a repo-root-relative display path (absolute fallback)."""
-    try:
-        return str(path.resolve().relative_to(ROOT))
-    except ValueError:
-        return str(path)
 
 
 def split_citations(text: str) -> tuple[str, str]:
@@ -133,7 +130,13 @@ def join_citations(body: str, citations: str) -> str:
 
 
 def parse_review(raw: str) -> tuple[bool, list[str], str]:
-    """Parse the reviewer's JSON verdict into (ok, problems, revised)."""
+    """Parse the reviewer's JSON verdict into (ok, problems, revised).
+
+    Type-safe: no value from the model is allowed to crash the pipeline or
+    corrupt the output. `ok` is read as a boolean only (the string "false"
+    counts as `False`), `problems` is read as a list of strings, and `revised`
+    is read as a non-empty string.
+    """
     text = strip_fences(raw)
     start, end = text.find("{"), text.rfind("}")
     if start == -1 or end < start:
@@ -144,32 +147,29 @@ def parse_review(raw: str) -> tuple[bool, list[str], str]:
         return False, [f"reviewer response was not valid JSON: {exc}"], ""
     if not isinstance(payload, dict):
         return False, ["reviewer response was not a JSON object"], ""
-    ok = bool(payload.get("ok"))
-    problems = [str(p) for p in payload.get("problems", []) if str(p).strip()]
-    revised = str(payload.get("revised", "")).strip()
-    return ok, problems, revised
 
+    ok_value = payload.get("ok")
+    if isinstance(ok_value, str):
+        ok = ok_value.strip().lower() == "true"
+    elif isinstance(ok_value, bool):
+        ok = ok_value
+    else:
+        ok = False
 
-def split_body_parts(body: str) -> list[str]:
-    """Split a critique body into parts: the general assessment and chapters.
+    problems_value = payload.get("problems")
+    malformed = ["malformed problem list"]
+    if problems_value is None:
+        problems: list[str] = []
+    elif isinstance(problems_value, str):
+        problems = list(malformed)
+    elif isinstance(problems_value, list):
+        problems = [p for p in problems_value if isinstance(p, str) and p.strip()]
+    else:
+        problems = list(malformed)
 
-    The general assessment is everything before the first `##` heading (the H1
-    title and the assessment paragraphs). Each chapter part starts at its own
-    `## {mm:ss} - {TITLE}` heading and runs until the next heading. This
-    mirrors the section structure enforced by the heading-parity gate.
-    """
-    parts: list[str] = []
-    current: list[str] = []
-    for line in body.splitlines():
-        if line.startswith("## "):
-            if current:
-                parts.append("\n".join(current))
-            current = [line]
-        else:
-            current.append(line)
-    if current:
-        parts.append("\n".join(current))
-    return parts
+    revised_value = payload.get("revised")
+    revised = revised_value if isinstance(revised_value, str) else ""
+    return ok, problems, revised.strip()
 
 
 def part_citation_numbers(part: str) -> set[int]:
@@ -263,8 +263,15 @@ def run_language_reviewer(
     original_body: str,
     candidate_body: str,
     problems: list,
+    previous_problems: list | None = None,
 ) -> tuple[bool, list[str], str]:
-    """Run one reviewer/fixer pass and return (ok, problems, revised body)."""
+    """Run one reviewer/fixer pass and return (ok, problems, revised body).
+
+    `previous_problems` carries the problems reported by the previous round so
+    the reviewer can re-verify only those items against the current candidate
+    text instead of re-auditing from scratch. When it is empty, no re-verify
+    section is added to the message.
+    """
     prompt = load_prompt(PROMPTS_DIR / "simplify-reviewer.md")
     problem_block = "\n".join(f"- {p}" for p in problems) or "(none)"
     user_message = (
@@ -272,6 +279,13 @@ def run_language_reviewer(
         f"# Simplified candidate body\n\n{candidate_body}\n\n"
         f"# Deterministic validation problems\n\n{problem_block}"
     )
+    if previous_problems:
+        reverify_block = "\n".join(f"- {p}" for p in previous_problems)
+        user_message += (
+            f"\n\n# Previously reported problems to re-verify\n\n{reverify_block}\n\n"
+            "Check the current candidate text for these items. "
+            "Report only the items that still appear in the text."
+        )
     raw = run_agent(
         client,
         model=settings.model(REVIEWER),
@@ -293,7 +307,7 @@ def main(argv: list[str] | None = None) -> int:
 
     settings = load_settings(max_language_rounds=args.max_rounds)
     original = read_result(args.episode)
-    run_dir = new_run_dir(args.episode, args.resume)
+    run_dir = new_run_dir(args.episode, args.run_id)
     trace = RunTrace(run_dir=run_dir, verbose=args.verbose)
     client = make_client(settings)
 
@@ -329,23 +343,29 @@ def main(argv: list[str] | None = None) -> int:
     candidate_body = simplified_body
     accepted = False
     last_problems: list = []
+    previous_remaining: list = []
     attempt = 0
     for attempt in range(settings.max_language_rounds + 1):
-        candidate = repair_mechanical(join_citations(candidate_body, citations))
+        candidate = repair_mechanical(
+            join_citations(candidate_body, citations), renumber=False
+        )
         det = deterministic_problems(candidate, original, has_citations)
         gate_text = f"round {attempt}: {len(det)} deterministic problem(s)"
         trace.log("gates", message=gate_text, problems=[str(p) for p in det])
         print(f"[ok] {gate_text}")
 
         ok, remaining, revised = run_language_reviewer(
-            client, settings, toolbox, body, candidate_body, det
+            client, settings, toolbox, body, candidate_body, det, previous_remaining
         )
         changed = bool(revised.strip()) and revised.strip() != candidate_body.strip()
         if changed:
             candidate_body = revised
-        final = repair_mechanical(join_citations(candidate_body, citations))
+        final = repair_mechanical(
+            join_citations(candidate_body, citations), renumber=False
+        )
         final_det = deterministic_problems(final, original, has_citations)
         last_problems = [str(p) for p in final_det] + remaining
+        previous_remaining = list(remaining)
         trace.log(
             "language_review",
             message=(
@@ -376,7 +396,9 @@ def main(argv: list[str] | None = None) -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     if not accepted:
-        final = repair_mechanical(join_citations(candidate_body, citations))
+        final = repair_mechanical(
+            join_citations(candidate_body, citations), renumber=False
+        )
         final_problems = deterministic_problems(final, original, has_citations)
         failed_path = out_path.with_suffix(".failed.md")
         failed_path.write_text(final, "utf-8")
@@ -393,15 +415,8 @@ def main(argv: list[str] | None = None) -> int:
     out_path.write_text(candidate, "utf-8")
     trace.save()
     print(f"[ok] wrote {display_path(out_path)}")
-    _print_usage(trace)
+    print_usage(trace)
     return 0
-
-
-def _print_usage(trace: RunTrace) -> None:
-    total = sum(entry["total"] for entry in trace.usage.values())
-    print(f"[ok] total tokens: {total}")
-    for agent, entry in sorted(trace.usage.items()):
-        print(f"      {agent}: {entry['calls']} call(s), {entry['total']} tokens")
 
 
 if __name__ == "__main__":
