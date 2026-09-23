@@ -21,9 +21,10 @@ from trace import RunTrace
 from typing import Any
 
 import requests
-from bs4 import BeautifulSoup
+import trafilatura
 from config import Settings
 from ddgs import DDGS
+from pypdf import PdfReader
 from sources import SourceRegistry
 from validate import validate_critique
 
@@ -34,17 +35,6 @@ USER_AGENT = (
 FETCH_MAX_TOKENS = 6000
 TRANSCRIPT_MAX_CHARS = 12000
 HEADING_RE = re.compile(r"^##\s+(\d{1,3}:\d{2})\s*-\s*(.+?)\s*$")
-BLOCK_TAGS = (
-    "script",
-    "style",
-    "noscript",
-    "nav",
-    "header",
-    "footer",
-    "aside",
-    "form",
-    "template",
-)
 BOILERPLATE_RE = re.compile(
     r"^(accept|agree|cookie|subscribe|sign in|log in|share|advertisement)\b",
     re.IGNORECASE,
@@ -64,17 +54,6 @@ def _liveness(status: int) -> bool | None:
     if 400 <= status < 500:
         return False
     return None
-
-
-try:  # trafilatura is a suggested dependency
-    import trafilatura
-except ImportError:  # pragma: no cover
-    trafilatura = None
-
-try:  # pypdf is a suggested dependency
-    from pypdf import PdfReader
-except ImportError:  # pragma: no cover
-    PdfReader = None
 
 
 def _truncate_tokens(text: str, max_tokens: int) -> tuple[str, bool]:
@@ -105,34 +84,27 @@ def _clean_text(text: str) -> str:
     return "\n".join(kept)
 
 
-def html_to_text(html: str, soup: BeautifulSoup | None = None) -> str:
-    """Extract main text from HTML, preferring trafilatura over BeautifulSoup.
+def extract_title(html: str) -> str:
+    """Extract the page title from HTML metadata with trafilatura."""
+    with contextlib.suppress(Exception):
+        metadata = trafilatura.extract_metadata(html)
+        if metadata and metadata.title:
+            return metadata.title.strip()
+    return ""
 
-    A pre-parsed `soup` is reused for the fallback extraction so a page is
-    never parsed twice; it is used only when the trafilatura fast path does
-    not apply.
-    """
-    if trafilatura is not None:
-        extracted = None
-        with contextlib.suppress(Exception):
-            extracted = trafilatura.extract(
-                html, include_comments=False, include_tables=False
-            )
-        if extracted and len(extracted) > 200:
-            return _clean_text(extracted)
 
-    if soup is None:
-        soup = BeautifulSoup(html, "lxml")
-    for tag in soup(BLOCK_TAGS):
-        tag.decompose()
-    container = soup.find("article") or soup.find("main") or soup.body or soup
-    return _clean_text(container.get_text("\n", strip=True))
+def html_to_text(html: str) -> str:
+    """Extract the main text from an HTML page with trafilatura."""
+    extracted = None
+    with contextlib.suppress(Exception):
+        extracted = trafilatura.extract(
+            html, include_comments=False, include_tables=False
+        )
+    return _clean_text(extracted or "")
 
 
 def pdf_to_text(data: bytes) -> tuple[str, int]:
     """Extract text from PDF bytes with pypdf; returns (text, page_count)."""
-    if PdfReader is None:
-        raise RuntimeError("pypdf is not installed")
     reader = PdfReader(io.BytesIO(data))
     pages = [(page.extract_text() or "") for page in reader.pages]
     return _clean_text("\n".join(pages)), len(reader.pages)
@@ -412,16 +384,13 @@ class Toolbox:
                 "text": truncated_text,
                 "truncated": truncated,
             }
-        soup = BeautifulSoup(response.text, "lxml")
-        title = ""
-        with contextlib.suppress(Exception):
-            title = soup.title.string or ""
-        text = html_to_text(response.text, soup=soup)
+        title = extract_title(response.text)
+        text = html_to_text(response.text)
         truncated_text, truncated = _truncate_tokens(text, FETCH_MAX_TOKENS)
-        self.registry.mark_fetched(url, ok=True, status=status, title=title.strip())
+        self.registry.mark_fetched(url, ok=True, status=status, title=title)
         return {
             "url": url,
-            "title": title.strip(),
+            "title": title,
             "text": truncated_text,
             "truncated": truncated,
         }

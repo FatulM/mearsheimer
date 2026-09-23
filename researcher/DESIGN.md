@@ -101,7 +101,7 @@ One simplification pass only. The output is `researcher/files/simplify/episode-N
 | Tool | Backend | Returns |
 |---|---|---|
 | `web_search(query, max_results)` | `ddgs` default metacrawl, 3 attempts with backoff on transient failures | `[{title, url, snippet}]` |
-| `fetch_url(url)` | `requests` + `trafilatura`/`BeautifulSoup`/`lxml` for HTML, `pypdf` for PDF | cleaned `{url, title, text}` (truncated) |
+| `fetch_url(url)` | `requests` + `trafilatura` for HTML, `pypdf` for PDF | cleaned `{url, title, text}` (truncated) |
 | `url_alive(url)` | `requests` GET | `{url, status, ok}` (ok `null` = unknown) |
 | `read_transcript(chapter_or_query)` | `processed/episode-N.md` | matching chapter text |
 | `note_write(topic_id, content)` | run scratchpad | path + ack |
@@ -172,21 +172,20 @@ researcher/
 Add to `requirements.txt`:
 
 - `ddgs` — DuckDuckGo search, no API key
-- `beautifulsoup4` — HTML parsing and the extraction fallback
-- `lxml` — fast BeautifulSoup parser
 - `tenacity` — retry/backoff for fetch and LLM calls
-- `trafilatura` — suggested: best-in-class main-text extraction for `fetch_url`; the heuristic BeautifulSoup path is the fallback when it fails or is unavailable
-- `pypdf` — suggested: text extraction for PDF sources (reports, papers) fetched by `fetch_url`
+- `trafilatura` — main-text extraction and page-title metadata for `fetch_url`
+- `pypdf` — text extraction for PDF sources (reports, papers) fetched by `fetch_url`
+- `fonttools` — required by `pypdf` to extract text from some fonts (Type1/embedded) in PDFs
 
 Already present and reused: `openai`, `python-dotenv`, `requests`, `tiktoken`.
 
 ### HTML to text (`fetch_url`)
 
-`fetch_url` does `requests.get` with a browser-like `User-Agent` and the request timeout, then dispatches on the response: PDF goes to the PDF path below, anything HTML goes to main-text extraction. HTML extraction runs `trafilatura.extract` (when installed) → a semantic BeautifulSoup fallback that drops `script`/`style`/`nav`/`header`/`footer`/`aside`/ad nodes and prefers `article`/`main`/the densest container. The result is whitespace-normalized, boilerplate lines are dropped, and the text is truncated to a token budget (`tiktoken`) so it fits the agent context, returning `{url, title, text, truncated}` or `{error}`.
+`fetch_url` does `requests.get` with a browser-like `User-Agent` and the request timeout, then dispatches on the response: PDF goes to the PDF path below, anything HTML goes to main-text extraction. HTML extraction runs `trafilatura.extract` and pulls the page title from `trafilatura.extract_metadata`. The result is whitespace-normalized, boilerplate lines are dropped, and the text is truncated to a token budget (`tiktoken`) so it fits the agent context, returning `{url, title, text, truncated}` or `{error}`.
 
 ### PDF to text (`fetch_url`)
 
-A PDF response is detected by content type or `.pdf` URL and passed to `pypdf`: read the bytes from the response, iterate pages, `extract_text()` each, join and whitespace-normalize, then truncate to the same token budget. Page count and a `truncated` flag are returned so the agent knows content was cut. Scanned/image-only PDFs yield little or no text; `fetch_url` then returns `{error: "no extractable text (possibly scanned)"}` rather than an empty string, and the source is not citable. OCR (e.g. `ocrmypdf`) is explicitly out of scope.
+A PDF response is detected by content type or `.pdf` URL and passed to `pypdf`: read the bytes from the response, iterate pages, `extract_text()` each, join and whitespace-normalize, then truncate to the same token budget. Page count and a `truncated` flag are returned so the agent knows content was cut. `fonttools` stays installed because `pypdf` uses it to decode text from some embedded/Type1 fonts. Scanned/image-only PDFs yield little or no text; `fetch_url` then returns `{error: "no extractable text (possibly scanned)"}` rather than an empty string, and the source is not citable. OCR (e.g. `ocrmypdf`) is explicitly out of scope.
 
 Failed fetches stay in the provenance registry as failures and are never citable.
 

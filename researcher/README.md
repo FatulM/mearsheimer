@@ -9,7 +9,7 @@ See `DESIGN.md` for the full design.
 ## Requirements
 
 - Python 3.12 virtualenv at the repo root (`.venv`).
-- `pip install -r requirements.txt` from the repo root (adds `ddgs`, `beautifulsoup4`, `lxml`, `tenacity`, and optional `trafilatura`, `pypdf`).
+- `pip install -r requirements.txt` from the repo root (adds `ddgs`, `tenacity`, and required `trafilatura`, `pypdf`).
 - The shared `.env` with `LLM_BASE_URL` and `LLM_API_KEY`.
 
 ## Configuration

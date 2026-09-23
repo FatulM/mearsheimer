@@ -153,7 +153,7 @@ Focus questions:
 
 - `_reachable` and `_liveness` treat the bot-block statuses `{401,403,405,429}` as `reachable`. A real source behind a bot wall is not dead.
 - `_truncate_tokens` uses a tiktoken `cl100k_base` budget of about 6000 tokens. The fallback is about 4 characters per token.
-- `html_to_text` prefers `trafilatura`. It falls back to BeautifulSoup main-text extraction. The extractor uses `article`/`main`/body. It drops block tags and cleans the boilerplate.
+- `extract_title` pulls the page title from `trafilatura.extract_metadata`. `html_to_text` runs `trafilatura.extract` (main-text extraction) and cleans the boilerplate. No other HTML parser is used.
 - `pdf_to_text` uses `pypdf` and reads one page at a time.
 
 **TranscriptIndex:**
