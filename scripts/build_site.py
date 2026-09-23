@@ -392,6 +392,7 @@ def page_template(
         '  <meta charset="utf-8">\n'
         '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
         f"  <title>{html.escape(title)}</title>\n"
+        '  <link rel="icon" type="image/png" href="assets/favicon.png">\n'
         '  <link rel="stylesheet" href="assets/style.css">\n'
         "</head>\n"
         "<body>\n"
