@@ -2,71 +2,44 @@
 
 ## Project
 
-This is a static Persian (Farsi) website presenting blog-style Persian summaries of the videos from [John Mearsheimer's YouTube channel](https://www.youtube.com/@JohnMearsheimer). Each episode of the channel becomes a Persian blog post on the website, linked to the original YouTube video. The website will be hosted on GitHub Pages.
+This repository builds a static Persian (Farsi) blog about John Mearsheimer's YouTube videos. Each episode becomes a Persian post linked to its original video. GitHub Pages hosts the site.
 
-## Environment & Setup
+## Environment and Commands
 
-- Python 3.12 venv at `.venv/`; always activate: `source .venv/bin/activate`; work dir is repo root.
-- Env creation is manual: `python3.12 -m venv .venv`, `source .venv/bin/activate`, `pip install -U pip`, `pip install -r requirements.txt`.
+- Work from the repository root.
+- Use the Python 3.12 virtual environment: `source .venv/bin/activate`.
+- Create it when needed: `python3.12 -m venv .venv && source .venv/bin/activate && pip install -U pip && pip install -r requirements.txt`.
+- Format Python: `ruff format scripts`.
+- Check formatting: `ruff format --check scripts`.
+- Lint Python: `ruff check scripts`.
+- Validate imports: `python -m compileall scripts`.
 
-## Commands
+## Rules
 
-- Install deps: `pip install -r requirements.txt`
-- Format / check: `ruff format scripts` / `ruff format --check scripts`
-- Lint: `ruff check scripts` · Validate imports: `python -m compileall scripts`
+- Never read `.env`. Use `.env.example` as its template.
+- Never commit, stage, reset, or discard changes unless the user asks.
+- Preserve unrelated user changes.
+- Keep Python lines at 120 characters or fewer.
+- Keep Markdown headings followed by a blank line.
+- Always end textual files (code, docs, etc.) with a blank line.
+- Write website content in Persian for Iranian readers unless the user asks otherwise.
+- Keep HTML, CSS, and JavaScript RTL and use the Vazirmatn font.
+- Edit source Markdown before generated HTML.
+- Treat `docs/` as the GitHub Pages root.
+- Store project skills in `.agents/skills/`.
 
-## Conventions
+## Structure
 
-- Never read `.env` file content directly; use `.env.example` file as the `.env` file template.
-- Never commit, stage, reset, or discard changes unless explicitly requested. Preserve unrelated user changes.
-- 120-char line length for .py files; Markdown has no line-length limit; Markdown headings followed by a blank line; all textual files end with a newline.
-- All website content is Persian (Farsi) for Iranian readers unless explicitly requested otherwise.
-- HTML/CSS/JS maintain RTL layout and Vazirmatn font usage.
-- Content updates go to source `.md` files first, then reflected in `.html` files.
-- `docs/` is the static site root published via GitHub Pages.
-- Project-specific skills live in `.agents/skills/`.
-
-## Project Structure
-
-```
-mearsheimer/
-├── content/                            # Persian blog posts (episode-N.md)
-├── critique/                           # Fact-check critiques of the posts (episode-N.md)
-├── info/                               # Channel + episode metadata (URL, title, chapters)
-├── transcript/                         # Downloaded YouTube subtitles (episode-N.srt)
-├── processed/                          # Minified transcripts for model input (episode-N.md)
-├── prompts/                            # Reusable system prompts (see "Prompts")
-├── scripts/                            # Python tooling (see "Pipelines")
-├── researcher/                         # Agentic critique app (see "Researcher Agent")
-├── reports/                            # Translation-check fidelity reports (episode-N.md)
-├── requirements.txt                    # Python dependencies
-├── docs/                               # Static site root (published via GitHub Pages)
-│   ├── index.html                      # Homepage: episode-0 intro + episode links
-│   ├── episode-N.html                  # One page per episode (N≥1)
-│   ├── critique-episode-N.html         # One fact-check page per critiqued episode (N≥1)
-│   ├── assets/style.css                # Shared stylesheet (Vazirmatn, RTL)
-│   └── robots.txt                      # Crawler rules
-├── .gitignore                          # Git ignore rules
-├── _config.yml                         # Jekyll/GitHub Pages site config
-├── .github/copilot-instructions.md     # Points to AGENTS.md
-├── .agents/skills/site-styling/        # LLM skill: themes the generated site
-├── .env                                # Gitignored endpoint config (see .env.example)
-├── .env.example                        # Committed template for .env
-└── AGENTS.md / CLAUDE.md / README.md / COPYRIGHT.md / LICENSE
-```
-
-## Episodes
-
-- Episode 0 is the channel introduction video and has no chapters. `info/episode-0.txt` holds only URL, title, description; its post follows the chapter-free list format of `prompts/generate-post-0.md`.
+`content/` contains Persian posts. `critique/` contains fact checks. `info/` contains metadata. `transcript/` and `processed/` contain subtitle inputs. `prompts/` contains reusable prompts. `scripts/` contains tooling. `researcher/` contains the agentic critique app. `reports/` contains translation reports. `docs/` contains the generated site.
 
 ## File Formats
 
-- **info** (`info/episode-N.txt`): video URL (line 1), title, then a multi-line description containing a `Chapters` section of `{m:ss} {TITLE}` lines after a dash separator (timestamps `m:ss`, no leading zero). `info/channel.txt`: channel URL / name / description.
-- **transcript** (`transcript/episode-N.srt`): standard SRT — cue number, `HH:MM:SS,mmm --> HH:MM:SS,mmm` timestamp line, then one or more text lines.
-- **processed** (`processed/episode-N.md`, built by `process_transcripts.py`): H1 English video title; per chapter an H2 `## {mm:ss} - {TITLE}` with concatenated subtitle text (timestamps normalised to `mm:ss`). Episode 0 has no sections — one text block.
-- **content** (`content/episode-N.md`): Persian post; H1 title translated to Persian; per chapter an H2 `## {mm:ss} - {TITLE}` (timestamp becomes a YouTube jump link on the site). Episode 0 uses lists, no sections.
+- `info/episode-N.txt`: URL, title, and description. The description contains a `Chapters` section with `{m:ss} {TITLE}` lines after a dash. Timestamps have no leading zero. `info/channel.txt` stores channel metadata.
+- `transcript/episode-N.srt`: standard SRT cues with `HH:MM:SS,mmm --> HH:MM:SS,mmm` timestamps.
+- `processed/episode-N.md`: English H1 title, then `## {mm:ss} - {TITLE}` sections with merged subtitle text. Episode 0 has one text block and no sections.
+- `content/episode-N.md`: Persian H1 title and matching chapter headings. Episode 0 uses lists instead of sections. Each heading must have a blank line after it.
 
-Every section heading must be followed by a blank line.
+Episode 0 is the channel introduction. Its metadata has no chapters, and its post follows `prompts/generate-post-0.md`.
 
 ## Subtitle Extraction
 
@@ -74,96 +47,85 @@ Every section heading must be followed by a blank line.
 yt-dlp --cookies-from-browser chrome --write-auto-sub --convert-subs=srt --skip-download {LINK}
 ```
 
-Rename the resulting `.srt` file to `transcript/episode-N.srt` for episode N.
+Rename the downloaded subtitle file to `transcript/episode-N.srt`.
 
-## LLM Environment
+## LLM Configuration
 
-`.env` (gitignored; `.env.example` is the committed template) configures the OpenAI-compatible endpoint used by the scripts:
+`.env` is gitignored and uses an OpenAI-compatible endpoint. The committed template contains these variables:
 
-```
-LLM_BASE_URL=https://api.avalai.org/v1
-LLM_API_KEY=aa-FILL_ME_IN
-LLM_MODEL=deepseek-v4.1-flash
-LLM_MODEL_CONTENT=gemini-3.8-flash
-LLM_MODEL_REPORT=gemini-3.5-flash-lite
-LLM_MODEL_FIX=deepseek-v4.1-flash
-LLM_MODEL_SIMPLIFY=gemini-3.5-flash-lite
-LLM_MODEL_CRITIQUE=gpt-5.6-terra
-LLM_MODEL_CHAT=deepseek-v4.1-flash
-LLM_MODEL_AGENT_PLANNER=deepseek-v4.1-flash
-LLM_MODEL_AGENT_LEAD=deepseek-v4.1-flash
-LLM_MODEL_AGENT_RESEARCH=deepseek-v4.1-flash
-LLM_MODEL_AGENT_REVIEWER=deepseek-v4.1-flash
-LLM_MODEL_AGENT_LANGUAGE=gemini-3.8-flash
+```text
+LLM_BASE_URL
+LLM_API_KEY
+LLM_MODEL
+LLM_MODEL_*
 ```
 
-Every script prefers a role-specific variable and falls back to the base `LLM_MODEL` when that variable is unset (failing only if both are missing):
+Each script uses its role-specific model variable and falls back to `LLM_MODEL`. It fails only when both are missing.
 
-- `LLM_MODEL_CHAT` — interactive chat (`chat.py`)
-- `LLM_MODEL_CONTENT` — content creation / summarization (`create_content.py`)
-- `LLM_MODEL_REPORT` — check/report scripts (`check_translation.py`)
-- `LLM_MODEL_FIX` — fix scripts (`fix_translation.py`)
-- `LLM_MODEL_SIMPLIFY` — simplification scripts (`simplify_language.py`, `simplify_critique.py`)
-- `LLM_MODEL_CRITIQUE` — fact-checking with the `web_search` tool (`critique_content.py`, `critique_content_cite.py`, `check_web_tool.py`)
-- `LLM_MODEL_AGENT_PLANNER`, `LLM_MODEL_AGENT_LEAD`, `LLM_MODEL_AGENT_RESEARCH`, `LLM_MODEL_AGENT_REVIEWER`, `LLM_MODEL_AGENT_LANGUAGE` — the agentic critique app (`researcher/`); `LLM_MODEL_AGENT_LANGUAGE` is the Persian-writing model for the simplification pass (`simplify.py`), the rest are used by `main.py`. See "Researcher Agent"
-
-## Prompts (`prompts/`)
-
-- **Post generation** — `generate-post-0.md` (chapter-free intro) and `generate-post-N.md` (transcript-based, N≥1) work with any model; no native YouTube access. `web-generate-posts*.md` are for **Gemini** models (native YouTube access), used manually with **Gemini 3.1 Pro**. For non-Gemini models, pass `transcript/episode-N.srt` alongside the video URL and chapters.
-- **Critique** — `research-critique.md` (content only) and `research-critique-full.md` (+ transcript) fact-check each chapter against authoritative English sources, keeping every chapter heading verbatim (timestamp + title) and never dropping one. The `-cite` variants (`research-critique-cite.md`, `research-critique-full-cite.md`) add inline `[cite: N]` markers and a numbered URL list; full rules are in the prompts. `critique_content.py` uses only the non-cite prompts; `critique_content_cite.py` uses only the `-cite` prompts (writes `critique/episode-N-cite.md`).
-- **Translation** — `check-translation.md` (input: transcript, blank line, `--`, blank line, post) reports per-problem-chapter headings with corrected Persian text; `fix-translation.md` (input: post, blank line, `---`, blank line, report) applies those corrections, outputting a full post conforming to `generate-post-N.md`'s structure.
-- **Simplification** — `simplify-language.md` (input: a Persian post) rewrites it in plainer Persian for Iranian readers. It is a language-simplification pass, not a summary: the structure (H1 title and every chapter heading verbatim) and all content are preserved; only the wording is simplified.
-- **Critique simplification** — `simplify-critique.md` (input: a Persian critique) rewrites it in plainer Persian the same way: the structure (H1 title, overall assessment, and every chapter heading byte-identical) and all content — including every judgement and verdict — are preserved; only the wording is simplified.
+| Variable | Used by |
+| --- | --- |
+| `LLM_MODEL_CHAT` | `chat.py` |
+| `LLM_MODEL_CONTENT` | `create_content.py` |
+| `LLM_MODEL_REPORT` | `check_translation.py` |
+| `LLM_MODEL_FIX` | `fix_translation.py` |
+| `LLM_MODEL_SIMPLIFY` | `simplify_language.py`, `simplify_critique.py` |
+| `LLM_MODEL_CRITIQUE` | Critique scripts and `check_web_tool.py` |
+| `LLM_MODEL_AGENT_*` | `researcher/` |
 
 ## Pipelines
 
-### Content Pipeline
+### Content
 
-1. Extract video metadata (URL, title, description, chapters) into `info/episode-N.txt`.
-2. Download subtitles with yt-dlp into `transcript/episode-N.srt` (see Subtitle Extraction).
-3. Run `python3 scripts/process_transcripts.py` → `processed/episode-N.md`.
-4. Run `python3 scripts/create_content.py N` → `content/episode-N.md` (uses `generate-post-0.md` for episode 0, `generate-post-N.md` for N≥1).
+1. Save metadata in `info/episode-N.txt`.
+2. Download subtitles to `transcript/episode-N.srt`.
+3. Run `python3 scripts/process_transcripts.py`.
+4. Run `python3 scripts/create_content.py N`. This uses `generate-post-0.md` for episode 0 and `generate-post-N.md` otherwise.
 
-### Critique Pipeline
+`web-generate-posts*.md` is for Gemini with native YouTube access. Other models need the transcript, video URL, and chapters.
 
-`python3 scripts/critique_content.py N [--full]` fact-checks the post and writes `critique/episode-N.md`. It calls the endpoint with `LLM_MODEL_CRITIQUE` (base `LLM_MODEL` fallback) plus a `web_search` tool; `--full` additionally passes the transcript from `processed/episode-N.md` for cross-referencing.
+### Critique
 
-`python3 scripts/critique_content_cite.py N [--full]` is the same fact-check but with the `-cite` prompts, adding inline `[cite: N]` markers and a numbered URL list; it writes `critique/episode-N-cite.md` instead.
+Run `python3 scripts/critique_content.py N [--full]` for a critique without citations, or `python3 scripts/critique_content_cite.py N [--full]` for inline citations and a URL list. Both use `LLM_MODEL_CRITIQUE` and `web_search`. `--full` also supplies the processed transcript. Preserve every chapter heading. The prompts are `research-critique*.md` and their `-cite` variants.
 
 ### Researcher Agent
 
-`python3 researcher/main.py N [--verbose] [--max-topics K] [--max-tool-calls K] [--max-review-rounds K] [--out PATH] [--run-id RUN_ID]` is an agentic replacement for the critique scripts. It reads `content/episode-N.md` and `processed/episode-N.md`, plans research topics (`LLM_MODEL_AGENT_PLANNER`), runs one research subagent per topic in parallel with real client-side tools (`web_search` via `ddgs`, `fetch_url` for HTML/PDF, `url_alive`, `read_transcript`, `note_write`) using `LLM_MODEL_AGENT_RESEARCH`, writes the cited critique with `LLM_MODEL_AGENT_LEAD`, then a reviewer/fixer (`LLM_MODEL_AGENT_REVIEWER`) fact-checks and repairs it, applying deterministic mechanical repairs (`repair_mechanical` in `validate.py`) before each gate check, until the deterministic gates pass (heading parity, citation self-consistency, per-chapter citation coverage, URL provenance requiring fetched content, and liveness).
+Run:
 
-Output goes to `researcher/files/result/episode-N.md`; per-run artifacts (trace, plan, notes, draft, reviewer passes, sources) go under `researcher/files/runs/<timestamp>-episode-N/` (gitignored). If the gates cannot be satisfied, it exits non-zero and writes `episode-N.failed.md` instead. See `researcher/DESIGN.md` and `researcher/README.md`.
+```bash
+python3 researcher/main.py N [--verbose] [--max-topics K] [--max-tool-calls K] [--max-review-rounds K] [--out PATH] [--run-id RUN_ID]
+```
 
-### Language Simplification
+The agent reads the post and processed transcript, plans topics, researches them in parallel, writes a cited critique, and reviews it. It uses `web_search`, `fetch_url`, `url_alive`, `read_transcript`, and `note_write`. Mechanical repairs run before deterministic gates for heading parity, citation consistency and coverage, fetched URL provenance, and URL liveness.
 
-`python3 researcher/simplify.py N [--verbose] [--max-rounds K] [--out PATH] [--run-id RUN_ID]` is a separate, second-stage pass over the finished critique. It reads `researcher/files/result/episode-N.md`, strips the citations section (kept aside verbatim), rewrites the body once in plainer Persian with `LLM_MODEL_AGENT_LANGUAGE`, then a reviewer/fixer loop (`LLM_MODEL_AGENT_REVIEWER`) compares the original body with the simplified body, repairs fidelity problems (dropped/added/altered claims, changed headings, changed `[cite: N]` markers), and reports only the problems that remain after its own revision. Each round after the first carries the previous round's remaining problems back to the reviewer as a re-verify list, so it checks only the items that still appear in the current candidate text instead of re-auditing from scratch. The corrected body is always adopted, so a fix is never discarded. The reviewer loop keeps the `ok: true` veto and writes the result only when no remaining problem exists and the gates pass, when the reviewer can no longer change the text, or after `RESEARCHER_LANGUAGE_MAX_ROUNDS` passes. One simplification pass only; the reviewer fixes, it never re-simplifies. Deterministic gates run before every reviewer pass and before the write: heading parity with the original result, structure, one `---`, citation self-consistency, and per-part citation coverage — for each chapter and the overall assessment the set of unique citation numbers must match the original, and markers are mechanically normalized (numbers sorted, adjacent markers merged into `[cite: 1,2]`) before the gates; the citations section itself is never renumbered. So a dropped citation, or one moved to another chapter, fails the run. The original result is left untouched; the simplified critique goes to `researcher/files/simplify/episode-N.md` (or `.failed.md`), with per-run artifacts under `researcher/files/runs/<timestamp>-episode-N-language/` (track `trace.json`, `original.md`, `citations.md`, `simplified-body-0.md`, `review-<k>.md`). See `researcher/DESIGN.md` and `researcher/README.md`.
+Successful output goes to `researcher/files/result/episode-N.md`. Run artifacts go to `researcher/files/runs/<timestamp>-episode-N/` and are gitignored. A failed run exits non-zero and writes `episode-N.failed.md`. See `researcher/DESIGN.md` and `researcher/README.md`.
 
-### Translation Check & Fix Pipeline
+### Researcher Language Simplification
 
-- `python3 scripts/check_translation.py N` — compares `processed/episode-N.md` against `content/episode-N.md` via `LLM_MODEL_REPORT` (no web search) and writes a fidelity report (verbatim headings + full corrected Persian text per problem chapter) to `reports/episode-N.md`.
-- `python3 scripts/fix_translation.py N` — applies that report to the post via `LLM_MODEL_FIX`, rewriting `content/episode-N.md`; only flagged text changes.
+Run:
 
-### Language Simplification Pipeline
+```bash
+python3 researcher/simplify.py N [--verbose] [--max-rounds K] [--out PATH] [--run-id RUN_ID]
+```
 
-- `python3 scripts/simplify_language.py N` — a second, post-fix iteration on the content: rewrites `content/episode-N.md` in plainer Persian via `prompts/simplify-language.md` and `LLM_MODEL_SIMPLIFY` (no web search). It is a language-simplification pass, not a summary — the H1 title and every chapter heading are kept verbatim and all content is preserved; only the wording is simplified. Overwrites `content/episode-N.md`.
-- `python3 scripts/simplify_critique.py N` — the same pass for the critique: rewrites `critique/episode-N.md` in plainer Persian via `prompts/simplify-critique.md` and `LLM_MODEL_SIMPLIFY` (no web search). The structure (H1 title, overall assessment, and every chapter heading byte-identical — heading parity with the article is preserved) and all content, including every judgement and verdict, are kept; only the wording is simplified. Overwrites `critique/episode-N.md`.
+The script preserves the original critique, citations, headings, claims, judgements, and citation placement while simplifying the Persian body. A reviewer/fixer loop checks and repairs the result. Deterministic gates run before each review and before writing. The output goes to `researcher/files/simplify/episode-N.md` or `.failed.md`; artifacts go to `researcher/files/runs/<timestamp>-episode-N-language/`.
 
-### Website Build
+### Translation and Simplification
 
-`python3 scripts/build_site.py` deterministically generates the site under `docs/`:
+- `python3 scripts/check_translation.py N` compares `processed/episode-N.md` with `content/episode-N.md` and writes `reports/episode-N.md`.
+- `python3 scripts/fix_translation.py N` applies the report to `content/episode-N.md` and changes only flagged text.
+- `python3 scripts/simplify_language.py N` simplifies a post without changing its title, headings, structure, or content.
+- `python3 scripts/simplify_critique.py N` does the same for a critique, including all judgements, verdicts, and heading parity.
 
-- Parses each post into semantic RTL Persian HTML (Vazirmatn, shared `docs/assets/style.css`). Each `## {mm:ss} - {TITLE}` becomes a chapter section whose title links to the matching video moment (`&t={seconds}` from `info/episode-N.txt`); the timestamp is carried by the link but not displayed.
-- Writes `docs/episode-N.html` (N≥1) and `docs/index.html` (embeds the episode-0 intro and links every episode).
-- For each `critique/episode-N.md`, writes `docs/critique-episode-N.html` with the same H1 and chapter headings but no video links (heading parity validated by `check_critiques.py`). A critique whose md carries a citations section (`---` rule + numbered URL list) is rendered as a cited page: each `[cite: N]` marker becomes a superscript link into the «منابع» references section at the end.
-- Article↔critique cross-links: magnifier icons (`a.critique-link`) on article headings point to the critique, back arrows on critique headings point to the article; anchors pair `ch-{i}` / `critique-{i}`.
-- Consistent chrome: article H1 links to the video, header/footer link to the channel with an AI-generated disclaimer, GitHub ribbon, and a source link on episode pages.
+## Website Build
 
-Division of labor: `build_site.py` owns content and structure (deterministic source of truth for the `.html` files); the styling layer lives in `docs/assets/style.css` and the page-shell templates inside the script, so regeneration keeps the design. Do not hand-edit generated bodies — change `content/episode-N.md` (or the templates) and rebuild.
+Run `python3 scripts/build_site.py` to generate `docs/`.
+
+- The script parses Markdown into semantic RTL HTML and turns each chapter timestamp into a YouTube jump link. The timestamp is not displayed.
+- It writes episode pages, the homepage, and critique pages. Critique pages preserve headings and render `[cite: N]` markers as links to their references.
+- Article headings link to critiques with magnifier icons. Critique headings link back with arrow icons. Keep `ch-{i}` and `critique-{i}` anchors intact.
+- Shared page chrome includes the channel link, AI-generated disclaimer, GitHub ribbon, and episode source link.
+- `build_site.py` owns content and structure. `docs/assets/style.css` owns styling. Do not hand-edit generated bodies. Change Markdown or templates, then rebuild.
 
 ## Skills
 
-Project-specific LLM skills live in `.agents/skills/`, each a `SKILL.md` plus optional helper files, loaded with the `skill` tool when a task matches.
-
-- [`site-styling`](/.agents/skills/site-styling/SKILL.md) — themes the generated site via `docs/assets/style.css` (and, if needed, the page-shell markup in `build_site.py`), preserving content fidelity: never alter article text, headings, or `mm:ss` timestamps, keep the cross-link icons and anchor ids intact, and stay RTL, Persian, Vazirmatn-rendered, and responsive.
+Project skills live in `.agents/skills/` as `SKILL.md` files with optional helpers. Use the `site-styling` skill for CSS or page-shell changes. Preserve article text, headings, timestamps, cross-link icons, anchor IDs, RTL layout, Persian text, Vazirmatn, and responsive behavior.
