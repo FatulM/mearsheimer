@@ -8,11 +8,8 @@ ddgs>=9.16,<10
 beautifulsoup4>=4.15,<5
 lxml>=6.1,<7
 tenacity>=9.1,<10
-# Suggested: richer main-text extraction for fetch_url (BeautifulSoup is the fallback)
 trafilatura>=2.2,<3
-# Suggested: PDF text extraction for fetch_url (reports/papers)
 pypdf>=6.19,<7
-# Optional: for pypdf pdf parsing
 fonttools>=4.65,<5
 
 # Only for development:
